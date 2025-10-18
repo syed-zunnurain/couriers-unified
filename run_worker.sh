@@ -11,7 +11,7 @@ while true; do
     echo "$(date): Processing shipment requests..."
     
     # Run the worker command
-    docker-compose run --rm app sh -c "python manage.py process_shipment_requests --batch-size 20"
+    docker-compose run --rm app sh -c "python manage.py shipment_worker --batch-size 20"
     
     # Wait 30 seconds before next run
     echo "$(date): Waiting 30 seconds before next run..."

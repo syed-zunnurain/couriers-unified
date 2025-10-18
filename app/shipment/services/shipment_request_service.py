@@ -1,6 +1,6 @@
 from django.db import transaction
 from core.models import ShipmentType, Route
-from .models import Shipper, Consignee, ShipmentRequest
+from ..models import Shipper, Consignee, ShipmentRequest
 
 
 class ShipmentRequestService:
