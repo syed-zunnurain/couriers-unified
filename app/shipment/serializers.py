@@ -75,6 +75,20 @@ class ShipmentRequestCreateSerializer(serializers.Serializer):
         # Validate that cities match the route
         self._validate_cities_match_route(data)
         
+        # Check if shipment with this reference number already exists
+        reference_number = data.get('reference_number')
+        if reference_number:
+            from shipment.models import ShipmentRequest
+            existing_shipment = ShipmentRequest.objects.filter(
+                reference_number=reference_number,
+                status='completed'
+            ).first()
+            
+            if existing_shipment:
+                # Return the existing shipment data instead of creating new one
+                data['existing_shipment'] = existing_shipment
+                data['action'] = 'existing_shipment_found'
+        
         return data
     
     def validate_shipment_type_id(self, value):

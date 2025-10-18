@@ -65,6 +65,24 @@ class ShipmentRequestService:
         """Create a new shipment request with all related data."""
         reference_number = validated_data['reference_number']
         
+        # Check if existing shipment was found in serializer
+        if validated_data.get('action') == 'existing_shipment_found':
+            existing_shipment = validated_data.get('existing_shipment')
+            return {
+                'action': 'existing_shipment_found',
+                'shipment': existing_shipment,
+                'message': 'Shipment with this reference number already exists',
+                'status_code': 200,
+                'data': {
+                    'id': existing_shipment.id,
+                    'reference_number': existing_shipment.reference_number,
+                    'courier': existing_shipment.courier.name,
+                    'tracking_number': existing_shipment.courier_external_id,
+                    'status': 'completed',
+                    'created_at': existing_shipment.created_at
+                }
+            }
+        
         existing_request, status = cls.check_existing_request(reference_number)
         
         if status == 'already_processing':
