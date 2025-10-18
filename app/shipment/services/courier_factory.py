@@ -10,10 +10,8 @@ logger = logging.getLogger(__name__)
 class CourierFactory:
     """Factory class to create and manage courier instances."""
     
-    # Registry of available couriers
     COURIER_CLASSES = {
         'dhl': DHLCourier,
-        # Add more couriers here as needed
     }
     
     def __init__(self):
@@ -28,7 +26,6 @@ class CourierFactory:
             logger.warning(f"CourierFactory: Courier '{courier_name}' not found in COURIER_CLASSES")
             return None
         
-        # Get configuration from database
         try:
             logger.info(f"CourierFactory: Looking up courier configuration for '{courier_name}' in database")
             courier_config = CourierConfig.objects.select_related('courier').get(
@@ -39,7 +36,6 @@ class CourierFactory:
         except CourierConfig.DoesNotExist:
             return None
         
-        # Create courier instance with configuration
         courier_class = self.COURIER_CLASSES[courier_name]
         logger.info(f"CourierFactory: Creating {courier_class.__name__} instance for '{courier_name}'")
         config = {
@@ -83,5 +79,4 @@ class CourierFactory:
         return list(CourierConfig.objects.filter(is_active=True).values_list('courier__name', flat=True))
 
 
-# Global factory instance
 courier_factory = CourierFactory()

@@ -46,7 +46,6 @@ class ShipmentRequestService:
     @classmethod
     def check_existing_request(cls, reference_number):
         """Check if a shipment request with the same reference number already exists."""
-        # Get the latest shipment request with this reference number
         existing_request = ShipmentRequest.objects.filter(
             reference_number=reference_number
         ).order_by('-created_at').first()
@@ -66,11 +65,9 @@ class ShipmentRequestService:
         """Create a new shipment request with all related data."""
         reference_number = validated_data['reference_number']
         
-        # Check for existing request
         existing_request, status = cls.check_existing_request(reference_number)
         
         if status == 'already_processing':
-            # Return existing request if it's still pending or processing
             return {
                 'action': 'already_exists',
                 'shipment_request': existing_request,
@@ -89,22 +86,18 @@ class ShipmentRequestService:
             }
         
         with transaction.atomic():
-            # Get or create shipper
             shipper = cls.get_or_create_shipper(
                 shipper_id=validated_data.get('shipper_id'),
                 shipper_data=validated_data.get('shipper')
             )
             
-            # Get or create consignee
             consignee = cls.get_or_create_consignee(
                 consignee_id=validated_data.get('consignee_id'),
                 consignee_data=validated_data.get('consignee')
             )
             
-            # Prepare request body
             request_body = cls.prepare_request_body(validated_data, shipper, consignee)
             
-            # Create shipment request
             shipment_request = ShipmentRequest.objects.create(
                 reference_number=validated_data['reference_number'],
                 request_body=request_body,

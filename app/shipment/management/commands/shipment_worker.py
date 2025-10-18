@@ -22,7 +22,6 @@ class Command(BaseCommand):
         self.stdout.write('Starting shipment request processing...')
         logger.info(f"ShipmentWorker: Starting processing with batch_size={batch_size}")
         
-        # Use the service to process requests
         processor = ShipmentProcessor()
         logger.info("ShipmentWorker: Created ShipmentProcessor instance")
         results = processor.process_requests(batch_size)
@@ -34,7 +33,6 @@ class Command(BaseCommand):
         
         self.stdout.write(f'Found {results["total"]} requests to process')
         
-        # Display results
         for detail in results['details']:
             if detail['success']:
                 courier_info = f" - Courier: {detail['courier']}" if detail.get('courier') else ""
@@ -51,7 +49,6 @@ class Command(BaseCommand):
                     )
                 )
         
-        # Summary
         self.stdout.write('\n' + '='*50)
         self.stdout.write(f'Processing Summary:')
         self.stdout.write(f'  Total processed: {results["total"]}')

@@ -12,7 +12,6 @@ class CourierOperations:
         """Create shipment with the specified courier."""
         logger.info(f"CourierOperations: Starting shipment creation with courier '{courier.name}'")
         try:
-            # Convert request_data to CourierRequest format
             logger.info(f"CourierOperations: Converting request data to CourierRequest format")
             courier_request = CourierRequest(
                 shipment_type=request_data.get('shipment_type', 'standard'),
@@ -27,7 +26,6 @@ class CourierOperations:
             )
             logger.info(f"CourierOperations: CourierRequest created - origin='{courier_request.origin}', destination='{courier_request.destination}', weight={courier_request.weight}")
             
-            # Create shipment using courier factory
             logger.info(f"CourierOperations: Calling courier_factory.create_shipment for '{courier.name.lower()}'")
             response = courier_factory.create_shipment(courier.name.lower(), courier_request)
             logger.info(f"CourierOperations: Received response from courier_factory: success={response.success}")

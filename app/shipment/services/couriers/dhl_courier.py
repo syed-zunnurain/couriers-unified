@@ -12,26 +12,16 @@ class DHLCourier(CourierInterface):
         """Create shipment with DHL (dummy response for testing)."""
         logger.info(f"DHLCourier: Starting shipment creation - origin='{request.origin}', destination='{request.destination}', weight={request.weight}")
         
-        # Return dummy response for testing
         import random
         from datetime import datetime, timedelta
-        
-        # Simulate 90% success rate
         success_chance = random.random()
         logger.info(f"DHLCourier: Random success chance = {success_chance:.3f} (need < 0.9 for success)")
         
         if success_chance < 0.9:
             logger.info("DHLCourier: Generating successful dummy response")
-            # Generate dummy tracking number
             tracking_number = f"DHL{random.randint(100000000, 999999999)}"
-            
-            # Generate dummy courier reference
             courier_reference = f"DHL-REF-{random.randint(10000, 99999)}"
-            
-            # Generate estimated delivery (1-3 days from now)
             estimated_delivery = (datetime.now() + timedelta(days=random.randint(1, 3))).strftime("%Y-%m-%d")
-            
-            # Generate dummy cost
             cost = round(random.uniform(15.0, 50.0), 2)
             
             logger.info(f"DHLCourier: Generated dummy data - tracking={tracking_number}, reference={courier_reference}, delivery={estimated_delivery}, cost=${cost}")
@@ -53,7 +43,6 @@ class DHLCourier(CourierInterface):
             )
         else:
             logger.warning("DHLCourier: Generating failure dummy response (10% chance)")
-            # Simulate 10% failure rate
             return CourierResponse(
                 success=False,
                 error_message="Dummy DHL API error: Service temporarily unavailable",

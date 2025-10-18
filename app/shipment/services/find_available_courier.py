@@ -10,20 +10,17 @@ class FindAvailableCourier:
     def find(self, shipment_type_id, route_id):
         """Find an available courier for the given shipment type and route."""
         try:
-            # Get couriers that support this shipment type
             courier_shipment_types = CourierShipmentType.objects.filter(
                 shipment_type_id=shipment_type_id,
                 courier__is_active=True
             )
             
-            # Get couriers that support this route
             courier_routes = CourierRoute.objects.filter(
                 route_id=route_id,
                 is_active=True,
                 courier__is_active=True
             )
             
-            # Find couriers that support both
             available_courier_ids = set()
             for cst in courier_shipment_types:
                 for cr in courier_routes:

@@ -64,18 +64,15 @@ class ShipmentProcessor:
         """Process a single shipment request."""
         logger.info(f"ShipmentProcessor: Starting to process single request ID={request.id}")
         with transaction.atomic():
-            # Update retry count and status
             request.retries += 1
             request.last_retried_at = timezone.now()
             request.status = 'processing'
             request.save()
             logger.info(f"ShipmentProcessor: Updated request ID={request.id} status to processing, retries={request.retries}")
             
-            # Get request data
             request_data = request.request_body
             logger.info(f"ShipmentProcessor: Request data for ID={request.id}: shipment_type_id={request_data.get('shipment_type_id')}, route_id={request_data.get('route_id')}")
             
-            # Find available courier
             logger.info(f"ShipmentProcessor: Looking for available courier for request ID={request.id}")
             courier = self.find_available_courier.find(
                 request_data.get('shipment_type_id'),
@@ -95,7 +92,6 @@ class ShipmentProcessor:
                 }
             
             logger.info(f"ShipmentProcessor: Found courier '{courier.name}' for request ID={request.id}")
-            # Process with courier
             logger.info(f"ShipmentProcessor: Starting courier processing for request ID={request.id} with courier '{courier.name}'")
             processing_result = self.process_with_courier(request_data, courier)
             
@@ -126,7 +122,6 @@ class ShipmentProcessor:
     def process_with_courier(self, request_data, courier):
         """Process the shipment with the assigned courier."""
         logger.info(f"ShipmentProcessor: Calling CourierOperations for courier '{courier.name}'")
-        # Use the courier operations service to create shipment
         courier_response = self.courier_operations.create_shipment_with_courier(courier, request_data)
         logger.info(f"ShipmentProcessor: Received response from CourierOperations: success={courier_response.success}")
         
@@ -149,7 +144,6 @@ class ShipmentProcessor:
         """Simulate courier API processing."""
         import random
         
-        # Simulate 80% success rate
         if random.random() < 0.8:
             return {
                 'success': True,
