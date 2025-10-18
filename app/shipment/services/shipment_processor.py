@@ -170,7 +170,12 @@ class ShipmentProcessor:
             )
 
             logger.info(f"ShipmentProcessor: Calling courier_factory.create_shipment for '{courier.name.lower()}'")
-            courier_response = courier_factory.create_shipment(courier.name.lower(), courier_request)
+            courier_response = courier_factory.create_shipment(
+                courier.name.lower(), 
+                courier_request, 
+                courier, 
+                request_data.get('shipment_type_id')
+            )
             logger.info(f"ShipmentProcessor: Received response from courier_factory: success={courier_response.success}")
             
             if courier_response.success:

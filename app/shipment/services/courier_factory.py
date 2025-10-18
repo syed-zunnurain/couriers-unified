@@ -17,7 +17,7 @@ class CourierFactory:
     def __init__(self):
         self._couriers: Dict[str, CourierInterface] = {}
     
-    def get_courier_instance(self, courier_name: str) -> Optional[CourierInterface]:
+    def get_courier_instance(self, courier_name: str, courier_obj=None) -> Optional[CourierInterface]:
         """Get courier instance with configuration from database."""
         courier_name = courier_name.lower()
         logger.info(f"CourierFactory: Getting courier instance for '{courier_name}'")
@@ -47,16 +47,16 @@ class CourierFactory:
         }
         logger.info(f"CourierFactory: Configuration loaded - base_url={config['base_url']}")
         
-        courier_instance = courier_class(courier_name, config)
+        courier_instance = courier_class(courier_name, config, courier_obj)
         logger.info(f"CourierFactory: Created courier instance: {courier_instance}")
         return courier_instance
     
-    def create_shipment(self, courier_name: str, request: CourierRequest) -> CourierResponse:
+    def create_shipment(self, courier_name: str, request: CourierRequest, courier_obj=None, shipment_type_id: int = None) -> CourierResponse:
         """Create shipment with specified courier."""
         logger.info(f"CourierFactory: Creating shipment with courier '{courier_name}'")
         try:
             logger.info(f"CourierFactory: Getting courier instance for '{courier_name}'")
-            courier = self.get_courier_instance(courier_name)
+            courier = self.get_courier_instance(courier_name, courier_obj)
             if not courier:
                 logger.error(f"CourierFactory: Courier '{courier_name}' not found or not configured")
                 return CourierResponse(
@@ -65,7 +65,7 @@ class CourierFactory:
                 )
             
             logger.info(f"CourierFactory: Found courier instance '{courier.courier_name}', calling create_shipment")
-            response = courier.create_shipment(request)
+            response = courier.create_shipment(request, shipment_type_id)
             logger.info(f"CourierFactory: Received response from courier: success={response.success}")
             return response
         except Exception as e:
