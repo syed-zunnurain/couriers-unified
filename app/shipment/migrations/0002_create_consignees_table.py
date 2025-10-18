@@ -16,6 +16,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(help_text='Name of the consignee', max_length=255)),
                 ('address', models.TextField(help_text='Address of the consignee')),
+                ('postal_code', models.CharField(help_text='Postal code of the consignee', max_length=25)),
                 ('city', models.CharField(help_text='City of the consignee', max_length=100)),
                 ('country', models.CharField(help_text='Country of the consignee', max_length=100)),
                 ('phone', models.CharField(help_text='Phone number of the consignee', max_length=20)),

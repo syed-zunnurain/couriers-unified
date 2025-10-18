@@ -10,7 +10,10 @@ class DHLCourier(CourierInterface):
     
     def create_shipment(self, request: CourierRequest) -> CourierResponse:
         """Create shipment with DHL (dummy response for testing)."""
-        logger.info(f"DHLCourier: Starting shipment creation - origin='{request.origin}', destination='{request.destination}', weight={request.weight}")
+        logger.info(f"DHLCourier: Starting shipment creation - origin='{request.route.origin}', destination='{request.route.destination}', weight={request.weight}")
+
+        dhl_payload = self._prepare_dhl_payload(request)
+        logger.info(f"DHLCourier: DHL payload = {dhl_payload}")
         
         import random
         from datetime import datetime, timedelta
@@ -55,17 +58,37 @@ class DHLCourier(CourierInterface):
     def _prepare_dhl_payload(self, request: CourierRequest) -> Dict[str, Any]:
         """Convert standardized request to DHL-specific format."""
         return {
-            "shipmentType": request.shipment_type,
-            "origin": {
-                "city": request.origin
+            "product": "V01PAK",
+            "refNo": request.reference_number,
+            "billingNumber": "33333333330102",
+            "shipper": {
+                "name1": request.shipper.name,
+                "addressStreet": request.shipper.address,
+                "city": request.shipper.city,
+                "country": request.shipper.country,
+                "phone": request.shipper.phone,
+                "email": request.shipper.email,
+                "postalCode": request.shipper.postal_code
             },
-            "destination": {
-                "city": request.destination
+            "consignee": {
+                "name1": request.consignee.name,
+                "addressStreet": request.consignee.address,
+                "city": request.consignee.city,
+                "country": request.consignee.country,
+                "phone": request.consignee.phone,
+                "email": request.consignee.email,
+                "postalCode": request.consignee.postal_code
             },
-            "weight": request.weight,
-            "dimensions": request.dimensions,
-            "items": request.items,
-            "pickupDate": request.pickup_date,
-            "specialInstructions": request.special_instructions,
-            "referenceNumber": request.reference_number
+            "details": {
+                "dim": {
+                    "uom": request.dimensions.unit,
+                    "length": request.dimensions.length,
+                    "width": request.dimensions.width,
+                    "height": request.dimensions.height
+                },
+                "weight": {
+                    "uom": request.weight.unit,
+                    "value": request.weight.value
+                },
+            }
         }

@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 class FindAvailableCourier:
     """Class for finding available courier for the given shipment type and route."""
     
-    def find(self, shipment_type_id, route_id):
+    def find(self, shipment_type_id, shipper_city, consignee_city):
         """Find an available courier for the given shipment type and route."""
         try:
             courier_shipment_types = CourierShipmentType.objects.filter(
@@ -16,7 +16,8 @@ class FindAvailableCourier:
             )
             
             courier_routes = CourierRoute.objects.filter(
-                route_id=route_id,
+                route__origin__iexact=shipper_city,
+                route__destination__iexact=consignee_city,
                 is_active=True,
                 courier__is_active=True
             )

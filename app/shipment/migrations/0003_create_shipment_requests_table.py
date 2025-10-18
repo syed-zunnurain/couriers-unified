@@ -17,6 +17,7 @@ class Migration(migrations.Migration):
                 ('request_body', models.JSONField(help_text='JSON data of the shipment request')),
                 ('reference_number', models.CharField(help_text='Reference number of the shipment request', max_length=255)),
                 ('status', models.CharField(choices=[('pending', 'Pending'), ('processing', 'Processing'), ('completed', 'Completed'), ('failed', 'Failed'), ('cancelled', 'Cancelled')], default='pending', help_text='Current status of the shipment request', max_length=20)),
+                ('failed_reason', models.TextField(blank=True, help_text='Reason for failure', null=True)),
                 ('retries', models.PositiveIntegerField(default=0, help_text='Number of retry attempts made')),
                 ('last_retried_at', models.DateTimeField(blank=True, help_text='Timestamp of the last retry attempt', null=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),

@@ -55,8 +55,8 @@ class Command(BaseCommand):
         
         # Create routes
         routes_data = [
-            {'origin': 'RUH', 'destination': 'JED'},
-            {'origin': 'JED', 'destination': 'RUH'}
+            {'origin': 'Bonn', 'destination': 'Berlin'},
+            {'origin': 'Berlin', 'destination': 'Bonn'}
         ]
         
         created_routes = []

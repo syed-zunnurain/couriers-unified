@@ -16,6 +16,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(help_text='Name of the shipper', max_length=255)),
+                ('postal_code', models.CharField(help_text='Postal code of the shipper', max_length=25)),
                 ('address', models.TextField(help_text='Address of the shipper')),
                 ('city', models.CharField(help_text='City of the shipper', max_length=100)),
                 ('country', models.CharField(help_text='Country of the shipper', max_length=100)),

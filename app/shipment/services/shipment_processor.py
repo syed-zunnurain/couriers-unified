@@ -1,9 +1,11 @@
 import logging
 from django.utils import timezone
 from django.db import transaction
-from shipment.models import ShipmentRequest
+from shipment.models import ShipmentRequest, Shipper, Consignee
+from core.models import Route
 from .find_available_courier import FindAvailableCourier
-from .courier_operations import CourierOperations
+from .courier_factory import courier_factory
+from .courier_interface import CourierRequest, Weight, Dimensions
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +16,6 @@ class ShipmentProcessor:
     def __init__(self):
         self.max_retries = 3
         self.find_available_courier = FindAvailableCourier()
-        self.courier_operations = CourierOperations()
     
     def process_requests(self, batch_size=10):
         """Process a batch of shipment requests."""
@@ -71,17 +72,24 @@ class ShipmentProcessor:
             logger.info(f"ShipmentProcessor: Updated request ID={request.id} status to processing, retries={request.retries}")
             
             request_data = request.request_body
-            logger.info(f"ShipmentProcessor: Request data for ID={request.id}: shipment_type_id={request_data.get('shipment_type_id')}, route_id={request_data.get('route_id')}")
+            logger.info(f"ShipmentProcessor: Request data for ID={request.id}: shipment_type_id={request_data.get('shipment_type_id')}")
+            
+            # Get shipper and consignee cities
+
+            consignee = Consignee.objects.get(id=request_data.get('consignee_id'))
+            shipper = Shipper.objects.get(id=request_data.get('shipper_id'))
             
             logger.info(f"ShipmentProcessor: Looking for available courier for request ID={request.id}")
             courier = self.find_available_courier.find(
                 request_data.get('shipment_type_id'),
-                request_data.get('route_id')
+                shipper.city,
+                consignee.city
             )
             
             if not courier:
                 logger.warning(f"ShipmentProcessor: No available courier found for request ID={request.id}")
                 request.status = 'failed'
+                request.failed_reason = 'No available couriers for this shipment'
                 request.save()
                 return {
                     'request_id': request.id,
@@ -93,10 +101,11 @@ class ShipmentProcessor:
             
             logger.info(f"ShipmentProcessor: Found courier '{courier.name}' for request ID={request.id}")
             logger.info(f"ShipmentProcessor: Starting courier processing for request ID={request.id} with courier '{courier.name}'")
-            processing_result = self.process_with_courier(request_data, courier)
+            processing_result = self.process_with_courier(request_data, request.reference_number, courier, shipper, consignee)
             
             if processing_result['success']:
                 logger.info(f"ShipmentProcessor: Successfully processed request ID={request.id} with courier '{courier.name}'")
+                request.failed_reason = None
                 request.status = 'completed'
                 request.save()
                 return {
@@ -109,6 +118,7 @@ class ShipmentProcessor:
             else:
                 logger.warning(f"ShipmentProcessor: Failed to process request ID={request.id} with courier '{courier.name}': {processing_result.get('error', 'Unknown error')}")
                 request.status = 'failed'
+                request.failed_reason = processing_result.get('error', 'Unknown error')
                 request.save()
                 return {
                     'request_id': request.id,
@@ -119,26 +129,72 @@ class ShipmentProcessor:
                 }
     
     
-    def process_with_courier(self, request_data, courier):
+    def process_with_courier(self, request_data, reference_number, courier, shipper, consignee):
         """Process the shipment with the assigned courier."""
-        logger.info(f"ShipmentProcessor: Calling CourierOperations for courier '{courier.name}'")
-        courier_response = self.courier_operations.create_shipment_with_courier(courier, request_data)
-        logger.info(f"ShipmentProcessor: Received response from CourierOperations: success={courier_response.success}")
-        
-        if courier_response.success:
-            logger.info(f"ShipmentProcessor: Courier '{courier.name}' processing successful, tracking_number={courier_response.tracking_number}")
-            return {
-                'success': True,
-                'message': f'Successfully submitted to {courier.name}',
-                'tracking_number': courier_response.tracking_number,
-                'courier_reference': courier_response.courier_reference
-            }
-        else:
-            logger.warning(f"ShipmentProcessor: Courier '{courier.name}' processing failed: {courier_response.error_message}")
+        logger.info(f"ShipmentProcessor: Converting request data to CourierRequest format for courier '{courier.name}'")
+        try:
+            # Get or create the required objects
+            consignee_city = consignee.city
+            shipper_city = shipper.city
+            
+            # Get or create route
+            route, created = Route.objects.get_or_create(
+                origin=shipper_city,
+                destination=consignee_city
+            )
+            
+            # Create Weight and Dimensions objects
+            weight = Weight(
+                value=request_data.get('weight', 0.0),
+                unit=request_data.get('weight_unit', 'kg')
+            )
+            
+            dimensions_data = request_data.get('dimensions', {})
+            dimensions = Dimensions(
+                height=dimensions_data.get('height', 0.0),
+                width=dimensions_data.get('width', 0.0),
+                length=dimensions_data.get('length', 0.0),
+                unit=request_data.get('dimension_unit', 'cm')
+            )
+            
+            courier_request = CourierRequest(
+                shipment_type=request_data.get('shipment_type', 'standard'),
+                reference_number=reference_number,
+                shipper=shipper,
+                consignee=consignee,
+                route=route,
+                weight=weight,
+                dimensions=dimensions,
+                pickup_date=request_data.get('pickup_date'),
+                special_instructions=request_data.get('special_instructions')
+            )
+
+            logger.info(f"ShipmentProcessor: Calling courier_factory.create_shipment for '{courier.name.lower()}'")
+            courier_response = courier_factory.create_shipment(courier.name.lower(), courier_request)
+            logger.info(f"ShipmentProcessor: Received response from courier_factory: success={courier_response.success}")
+            
+            if courier_response.success:
+                logger.info(f"ShipmentProcessor: Courier '{courier.name}' processing successful, tracking_number={courier_response.tracking_number}")
+                return {
+                    'success': True,
+                    'message': f'Successfully submitted to {courier.name}',
+                    'tracking_number': courier_response.tracking_number,
+                    'courier_reference': courier_response.courier_reference
+                }
+            else:
+                logger.warning(f"ShipmentProcessor: Courier '{courier.name}' processing failed: {courier_response.error_message}")
+                return {
+                    'success': False,
+                    'error': courier_response.error_message
+                }
+                
+        except Exception as e:
+            logger.error(f'ShipmentProcessor: Error creating shipment with courier: {str(e)}')
             return {
                 'success': False,
-                'error': courier_response.error_message
+                'error': f"Failed to create shipment: {str(e)}"
             }
+
     
     def simulate_courier_processing(self, request_data, courier):
         """Simulate courier API processing."""

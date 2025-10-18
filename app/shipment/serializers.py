@@ -8,7 +8,7 @@ class ShipperSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Shipper
-        fields = ['name', 'address', 'city', 'country', 'phone', 'email']
+        fields = ['name', 'address', 'postal_code', 'city', 'country', 'phone', 'email']
 
 
 class ConsigneeSerializer(serializers.ModelSerializer):
@@ -16,7 +16,7 @@ class ConsigneeSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Consignee
-        fields = ['name', 'address', 'city', 'country', 'phone', 'email']
+        fields = ['name', 'address', 'postal_code', 'city', 'country', 'phone', 'email']
 
 
 class ShipmentRequestCreateSerializer(serializers.Serializer):
@@ -24,7 +24,6 @@ class ShipmentRequestCreateSerializer(serializers.Serializer):
     
     # Required fields
     shipment_type_id = serializers.IntegerField()
-    route_id = serializers.IntegerField()
     reference_number = serializers.CharField(max_length=255)
     
     # Shipper - either ID or full information
@@ -42,8 +41,18 @@ class ShipmentRequestCreateSerializer(serializers.Serializer):
     )
     pickup_date = serializers.DateField()
     weight = serializers.DecimalField(max_digits=10, decimal_places=2)
+    weight_unit = serializers.CharField(
+        max_length=10,
+        default='kg',
+        help_text="Unit of measurement for weight (e.g., kg, lb, g)"
+    )
     dimensions = serializers.DictField(
         help_text="Dimensions in format: {length: 10, width: 5, height: 3}"
+    )
+    dimension_unit = serializers.CharField(
+        max_length=10,
+        default='cm',
+        help_text="Unit of measurement for dimensions (e.g., cm, in, m)"
     )
     special_instructions = serializers.CharField(
         required=False, 
@@ -52,7 +61,7 @@ class ShipmentRequestCreateSerializer(serializers.Serializer):
     )
     
     def validate(self, data):
-        """Validate that either shipper_id or shipper data is provided."""
+        """Validate that either shipper_id or shipper data is provided and cities match route."""
         if not data.get('shipper_id') and not data.get('shipper'):
             raise serializers.ValidationError(
                 "Either 'shipper_id' or 'shipper' information must be provided."
@@ -63,6 +72,9 @@ class ShipmentRequestCreateSerializer(serializers.Serializer):
                 "Either 'consignee_id' or 'consignee' information must be provided."
             )
         
+        # Validate that cities match the route
+        self._validate_cities_match_route(data)
+        
         return data
     
     def validate_shipment_type_id(self, value):
@@ -71,15 +83,7 @@ class ShipmentRequestCreateSerializer(serializers.Serializer):
             ShipmentType.objects.get(id=value)
         except ShipmentType.DoesNotExist:
             raise serializers.ValidationError("Shipment type with this ID does not exist.")
-        return value
-    
-    def validate_route_id(self, value):
-        """Validate that route exists."""
-        try:
-            Route.objects.get(id=value)
-        except Route.DoesNotExist:
-            raise serializers.ValidationError("Route with this ID does not exist.")
-        return value
+        return value 
     
     def validate_shipper_id(self, value):
         """Validate that shipper exists if provided."""
@@ -98,3 +102,41 @@ class ShipmentRequestCreateSerializer(serializers.Serializer):
             except Consignee.DoesNotExist:
                 raise serializers.ValidationError("Consignee with this ID does not exist.")
         return value
+    
+    def _validate_cities_match_route(self, data):
+        """Validate that a route exists from shipper's city to consignee's city."""
+        
+        # Get shipper city
+        shipper_city = None
+        if data.get('shipper_id'):
+            try:
+                shipper = Shipper.objects.get(id=data['shipper_id'])
+                shipper_city = shipper.city
+            except Shipper.DoesNotExist:
+                raise serializers.ValidationError("Shipper with this ID does not exist.")
+        elif data.get('shipper'):
+            shipper_city = data['shipper'].get('city')
+        
+        # Get consignee city
+        consignee_city = None
+        if data.get('consignee_id'):
+            try:
+                consignee = Consignee.objects.get(id=data['consignee_id'])
+                consignee_city = consignee.city
+            except Consignee.DoesNotExist:
+                raise serializers.ValidationError("Consignee with this ID does not exist.")
+        elif data.get('consignee'):
+            consignee_city = data['consignee'].get('city')
+        
+        # Validate that a route exists from shipper city to consignee city
+        if shipper_city and consignee_city:
+            route_exists = Route.objects.filter(
+                origin__iexact=shipper_city,
+                destination__iexact=consignee_city
+            ).exists()
+            
+            if not route_exists:
+                raise serializers.ValidationError(
+                    f"No route found from '{shipper_city}' to '{consignee_city}'. "
+                    f"Please check available routes or contact support."
+                )

@@ -33,14 +33,16 @@ class ShipmentRequestService:
         """Prepare the JSON request body for storage."""
         return {
             'shipment_type_id': validated_data['shipment_type_id'],
-            'route_id': validated_data['route_id'],
             'shipper_id': shipper.id,
             'consignee_id': consignee.id,
-            'items': validated_data['items'],
-            'pickup_date': validated_data['pickup_date'].isoformat(),
+            'pickup_date': validated_data['pickup_date'].isoformat() if hasattr(validated_data['pickup_date'], 'isoformat') else str(validated_data['pickup_date']),
             'weight': float(validated_data['weight']),
+            'weight_unit': validated_data.get('weight_unit', 'kg'),
             'dimensions': validated_data['dimensions'],
-            'special_instructions': validated_data.get('special_instructions', '')
+            'dimension_unit': validated_data.get('dimension_unit', 'cm'),
+            'special_instructions': validated_data.get('special_instructions', ''),
+            'shipper_city': shipper.city,
+            'consignee_city': consignee.city
         }
     
     @classmethod
@@ -53,8 +55,6 @@ class ShipmentRequestService:
         if existing_request:
             if existing_request.status in ['pending', 'processing']:
                 return existing_request, 'already_processing'
-            elif existing_request.status == 'failed':
-                return existing_request, 'can_retry'
             else:  # completed, cancelled
                 return existing_request, 'can_create_new'
         

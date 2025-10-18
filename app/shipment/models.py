@@ -1,11 +1,83 @@
 from django.db import models
 
 
+class Shipment(models.Model):
+    """Model representing a shipment with courier and tracking information."""
+    
+    courier = models.ForeignKey(
+        'core.Courier',
+        on_delete=models.CASCADE,
+        help_text="The courier service handling this shipment"
+    )
+    shipment_type = models.ForeignKey(
+        'core.ShipmentType',
+        on_delete=models.CASCADE,
+        help_text="The type of shipment"
+    )
+    courier_external_id = models.CharField(
+        max_length=255,
+        unique=True,
+        help_text="External ID provided by the courier service"
+    )
+    reference_number = models.CharField(
+        max_length=255,
+        unique=True,
+        help_text="Reference number for this shipment"
+    )
+    shipper = models.ForeignKey(
+        'Shipper',
+        on_delete=models.CASCADE,
+        help_text="The shipper (sender) of this shipment"
+    )
+    route = models.ForeignKey(
+        'core.Route',
+        on_delete=models.CASCADE,
+        help_text="The route of this shipment"
+    )
+    consignee = models.ForeignKey(
+        'Consignee',
+        on_delete=models.CASCADE,
+        help_text="The consignee (receiver) of this shipment"
+    )
+    height = models.PositiveIntegerField(
+        help_text="Height of the shipment"
+    )
+    width = models.PositiveIntegerField(
+        help_text="Width of the shipment"
+    )
+    length = models.PositiveIntegerField(
+        help_text="Length of the shipment"
+    )
+    dimension_unit = models.CharField(
+        max_length=10,
+        help_text="Unit of measurement for dimensions (e.g., cm, in)"
+    )
+    weight = models.PositiveIntegerField(
+        help_text="Weight of the shipment"
+    )
+    weight_unit = models.CharField(
+        max_length=10,
+        help_text="Unit of measurement for weight (e.g., kg, lb)"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'shipments'
+        ordering = ['-created_at']
+        verbose_name = 'Shipment'
+        verbose_name_plural = 'Shipments'
+    
+    def __str__(self):
+        return f"Shipment {self.id} - {self.reference_number}"
+
+
 class Shipper(models.Model):
     """Model representing a shipper (sender) of shipments."""
     
     name = models.CharField(max_length=255, help_text="Name of the shipper")
     address = models.TextField(help_text="Address of the shipper")
+    postal_code = models.CharField(max_length=25, help_text="Postal code of the shipper")
     city = models.CharField(max_length=100, help_text="City of the shipper")
     country = models.CharField(max_length=100, help_text="Country of the shipper")
     phone = models.CharField(max_length=20, help_text="Phone number of the shipper")
@@ -29,6 +101,7 @@ class Consignee(models.Model):
     name = models.CharField(max_length=255, help_text="Name of the consignee")
     address = models.TextField(help_text="Address of the consignee")
     city = models.CharField(max_length=100, help_text="City of the consignee")
+    postal_code = models.CharField(max_length=25, help_text="Postal code of the consignee")
     country = models.CharField(max_length=100, help_text="Country of the consignee")
     phone = models.CharField(max_length=20, help_text="Phone number of the consignee")
     email = models.EmailField(help_text="Email address of the consignee")
@@ -64,6 +137,7 @@ class ShipmentRequest(models.Model):
         default='pending',
         help_text="Current status of the shipment request"
     )
+    failed_reason = models.TextField(blank=True, help_text='Reason for failure', null=True)
     retries = models.PositiveIntegerField(
         default=0, 
         help_text="Number of retry attempts made"

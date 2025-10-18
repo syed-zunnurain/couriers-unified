@@ -4,18 +4,47 @@ from dataclasses import dataclass
 
 
 @dataclass
+class Weight:
+    """Represents weight with value and unit."""
+    value: float
+    unit: str
+    
+    def to_kg(self) -> float:
+        """Convert weight to kilograms."""
+        if self.unit.lower() in ['kg', 'kilogram', 'kilograms']:
+            return self.value
+        else:
+            raise ValueError(f"Unsupported weight unit: {self.unit}")
+
+
+@dataclass
+class Dimensions:
+    """Represents dimensions with height, width, length and unit."""
+    height: float
+    width: float
+    length: float
+    unit: str
+    
+    def to_cm(self) -> 'Dimensions':
+        """Convert dimensions to centimeters."""
+        if self.unit.lower() in ['mm', 'millimeter', 'millimeters']:
+            return self
+        else:
+            raise ValueError(f"Unsupported dimension unit: {self.unit}")
+
+
+@dataclass
 class CourierRequest:
     """Standardized request format for all couriers."""
     shipment_type: str
-    origin: str
-    destination: str
-    weight: float
-    dimensions: Dict[str, float]  # {'length': 40, 'width': 30, 'height': 20}
-    items: list
-    pickup_date: str
+    reference_number: str
+    shipper: 'Shipper'
+    consignee: 'Consignee'
+    route: 'Route'
+    weight: Weight
+    dimensions: Dimensions
+    pickup_date: Optional[str] = None
     special_instructions: Optional[str] = None
-    reference_number: str = None
-
 
 @dataclass
 class CourierResponse:
