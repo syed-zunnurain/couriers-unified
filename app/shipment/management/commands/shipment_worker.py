@@ -1,5 +1,8 @@
+import logging
 from django.core.management.base import BaseCommand
 from shipment.services.shipment_processor import ShipmentProcessor
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -17,10 +20,13 @@ class Command(BaseCommand):
         batch_size = options['batch_size']
         
         self.stdout.write('Starting shipment request processing...')
+        logger.info(f"ShipmentWorker: Starting processing with batch_size={batch_size}")
         
         # Use the service to process requests
         processor = ShipmentProcessor()
+        logger.info("ShipmentWorker: Created ShipmentProcessor instance")
         results = processor.process_requests(batch_size)
+        logger.info(f"ShipmentWorker: Processing completed with {results['total']} requests")
         
         if results['total'] == 0:
             self.stdout.write(self.style.SUCCESS('No shipment requests to process'))

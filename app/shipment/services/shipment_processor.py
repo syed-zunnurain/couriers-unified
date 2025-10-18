@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.db import transaction
 from shipment.models import ShipmentRequest
 from .find_available_courier import FindAvailableCourier
+from .courier_operations import CourierOperations
 
 logger = logging.getLogger(__name__)
 
@@ -13,10 +14,13 @@ class ShipmentProcessor:
     def __init__(self):
         self.max_retries = 3
         self.find_available_courier = FindAvailableCourier()
+        self.courier_operations = CourierOperations()
     
     def process_requests(self, batch_size=10):
         """Process a batch of shipment requests."""
+        logger.info(f"ShipmentProcessor: Starting to process requests with batch_size={batch_size}")
         requests_to_process = self.get_requests_to_process(batch_size)
+        logger.info(f"ShipmentProcessor: Found {len(requests_to_process)} requests to process")
         
         results = {
             'total': len(requests_to_process),
@@ -26,17 +30,20 @@ class ShipmentProcessor:
         }
         
         for request in requests_to_process:
+            logger.info(f"ShipmentProcessor: Processing request ID={request.id}, reference={request.reference_number}")
             try:
                 result = self.process_single_request(request)
                 results['details'].append(result)
                 
                 if result['success']:
                     results['successful'] += 1
+                    logger.info(f"ShipmentProcessor: Successfully processed request ID={request.id}")
                 else:
                     results['failed'] += 1
+                    logger.warning(f"ShipmentProcessor: Failed to process request ID={request.id}: {result.get('error', 'Unknown error')}")
                     
             except Exception as e:
-                logger.error(f'Error processing request {request.id}: {str(e)}')
+                logger.error(f'ShipmentProcessor: Error processing request {request.id}: {str(e)}')
                 results['failed'] += 1
                 results['details'].append({
                     'request_id': request.id,
@@ -55,23 +62,28 @@ class ShipmentProcessor:
     
     def process_single_request(self, request):
         """Process a single shipment request."""
+        logger.info(f"ShipmentProcessor: Starting to process single request ID={request.id}")
         with transaction.atomic():
             # Update retry count and status
             request.retries += 1
             request.last_retried_at = timezone.now()
             request.status = 'processing'
             request.save()
+            logger.info(f"ShipmentProcessor: Updated request ID={request.id} status to processing, retries={request.retries}")
             
             # Get request data
             request_data = request.request_body
+            logger.info(f"ShipmentProcessor: Request data for ID={request.id}: shipment_type_id={request_data.get('shipment_type_id')}, route_id={request_data.get('route_id')}")
             
             # Find available courier
+            logger.info(f"ShipmentProcessor: Looking for available courier for request ID={request.id}")
             courier = self.find_available_courier.find(
                 request_data.get('shipment_type_id'),
                 request_data.get('route_id')
             )
             
             if not courier:
+                logger.warning(f"ShipmentProcessor: No available courier found for request ID={request.id}")
                 request.status = 'failed'
                 request.save()
                 return {
@@ -82,10 +94,13 @@ class ShipmentProcessor:
                     'courier': None
                 }
             
+            logger.info(f"ShipmentProcessor: Found courier '{courier.name}' for request ID={request.id}")
             # Process with courier
+            logger.info(f"ShipmentProcessor: Starting courier processing for request ID={request.id} with courier '{courier.name}'")
             processing_result = self.process_with_courier(request_data, courier)
             
             if processing_result['success']:
+                logger.info(f"ShipmentProcessor: Successfully processed request ID={request.id} with courier '{courier.name}'")
                 request.status = 'completed'
                 request.save()
                 return {
@@ -96,6 +111,7 @@ class ShipmentProcessor:
                     'courier': courier.name
                 }
             else:
+                logger.warning(f"ShipmentProcessor: Failed to process request ID={request.id} with courier '{courier.name}': {processing_result.get('error', 'Unknown error')}")
                 request.status = 'failed'
                 request.save()
                 return {
@@ -109,9 +125,25 @@ class ShipmentProcessor:
     
     def process_with_courier(self, request_data, courier):
         """Process the shipment with the assigned courier."""
-        # This is where you would integrate with actual courier APIs
-        # For now, we'll simulate the processing
-        return self.simulate_courier_processing(request_data, courier)
+        logger.info(f"ShipmentProcessor: Calling CourierOperations for courier '{courier.name}'")
+        # Use the courier operations service to create shipment
+        courier_response = self.courier_operations.create_shipment_with_courier(courier, request_data)
+        logger.info(f"ShipmentProcessor: Received response from CourierOperations: success={courier_response.success}")
+        
+        if courier_response.success:
+            logger.info(f"ShipmentProcessor: Courier '{courier.name}' processing successful, tracking_number={courier_response.tracking_number}")
+            return {
+                'success': True,
+                'message': f'Successfully submitted to {courier.name}',
+                'tracking_number': courier_response.tracking_number,
+                'courier_reference': courier_response.courier_reference
+            }
+        else:
+            logger.warning(f"ShipmentProcessor: Courier '{courier.name}' processing failed: {courier_response.error_message}")
+            return {
+                'success': False,
+                'error': courier_response.error_message
+            }
     
     def simulate_courier_processing(self, request_data, courier):
         """Simulate courier API processing."""
