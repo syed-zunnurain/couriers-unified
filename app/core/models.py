@@ -118,3 +118,54 @@ class CourierRoute(models.Model):
     
     def __str__(self):
         return f"{self.courier.name} - {self.route.origin} → {self.route.destination}"
+
+
+class CourierConfig(models.Model):
+    """Model representing courier configuration settings."""
+    
+    courier = models.ForeignKey(
+        Courier, 
+        on_delete=models.CASCADE,
+        help_text="The courier this configuration belongs to"
+    )
+    base_url = models.URLField(
+        help_text="Base URL for the courier's API"
+    )
+    api_key = models.CharField(
+        max_length=500, 
+        help_text="API key for authentication"
+    )
+    api_secret = models.CharField(
+        max_length=500, 
+        blank=True, 
+        null=True,
+        help_text="API secret for authentication (optional)"
+    )
+    username = models.CharField(
+        max_length=255, 
+        blank=True, 
+        null=True,
+        help_text="Username for authentication (optional)"
+    )
+    password = models.CharField(
+        max_length=255, 
+        blank=True, 
+        null=True,
+        help_text="Password for authentication (optional)"
+    )
+    is_active = models.BooleanField(
+        default=True, 
+        help_text="Whether this configuration is currently active"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'courier_configs'
+        ordering = ['courier__name']
+        verbose_name = 'Courier Configuration'
+        verbose_name_plural = 'Courier Configurations'
+        unique_together = ['courier']  # One config per courier
+    
+    def __str__(self):
+        return f"{self.courier.name} Configuration"
