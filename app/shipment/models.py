@@ -57,6 +57,7 @@ class ShipmentRequest(models.Model):
     ]
     
     request_body = models.JSONField(help_text="JSON data of the shipment request")
+    reference_number = models.CharField(help_text="Reference number of the shipment request", max_length=255)
     status = models.CharField(
         max_length=20, 
         choices=STATUS_CHOICES, 

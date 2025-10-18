@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('request_body', models.JSONField(help_text='JSON data of the shipment request')),
+                ('reference_number', models.CharField(help_text='Reference number of the shipment request', max_length=255)),
                 ('status', models.CharField(choices=[('pending', 'Pending'), ('processing', 'Processing'), ('completed', 'Completed'), ('failed', 'Failed'), ('cancelled', 'Cancelled')], default='pending', help_text='Current status of the shipment request', max_length=20)),
                 ('retries', models.PositiveIntegerField(default=0, help_text='Number of retry attempts made')),
                 ('last_retried_at', models.DateTimeField(blank=True, help_text='Timestamp of the last retry attempt', null=True)),

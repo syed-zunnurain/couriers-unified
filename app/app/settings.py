@@ -32,7 +32,9 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'django.contrib.contenttypes',
     'django.contrib.staticfiles',
+    'rest_framework',
     'core',
     'shipment',
 ]
@@ -43,6 +45,12 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [],
+    'DEFAULT_PERMISSION_CLASSES': [],
+    'UNAUTHENTICATED_USER': None,
+}
 
 ROOT_URLCONF = 'app.urls'
 
