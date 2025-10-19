@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 ('width', models.PositiveIntegerField(help_text='Width of the shipment')),
                 ('length', models.PositiveIntegerField(help_text='Length of the shipment')),
                 ('dimension_unit', models.CharField(help_text='Unit of measurement for dimensions (e.g., cm, in)', max_length=10)),
-                ('weight', models.PositiveIntegerField(help_text='Weight of the shipment')),
+                ('weight', models.DecimalField(decimal_places=2, help_text='Weight of the shipment', max_digits=10)),
                 ('weight_unit', models.CharField(help_text='Unit of measurement for weight (e.g., kg, lb)', max_length=10)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),

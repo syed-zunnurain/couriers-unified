@@ -1,8 +1,7 @@
 import logging
 from django.utils import timezone
 from django.db import transaction
-from shipment.models import ShipmentRequest, Shipper, Consignee
-from core.models import Route
+from ..repositories.repository_factory import repositories
 from .find_available_courier import FindAvailableCourier
 from .courier_factory import courier_factory
 from .courier_interface import CourierRequest, Weight, Dimensions
@@ -56,10 +55,7 @@ class ShipmentProcessor:
     
     def get_requests_to_process(self, batch_size):
         """Get shipment requests that need processing."""
-        return ShipmentRequest.objects.filter(
-            status__in=['pending', 'failed'],
-            retries__lt=self.max_retries
-        ).order_by('created_at')[:batch_size]
+        return repositories.shipment_request.get_requests_to_process(batch_size)
     
     def process_single_request(self, request):
         """Process a single shipment request."""
@@ -74,10 +70,23 @@ class ShipmentProcessor:
             request_data = request.request_body
             logger.info(f"ShipmentProcessor: Request data for ID={request.id}: shipment_type_id={request_data.get('shipment_type_id')}")
             
-            # Get shipper and consignee cities
-
-            consignee = Consignee.objects.get(id=request_data.get('consignee_id'))
-            shipper = Shipper.objects.get(id=request_data.get('shipper_id'))
+            # Get shipper and consignee objects
+            consignee = repositories.consignee.get_by_id(request_data.get('consignee_id'))
+            shipper = repositories.shipper.get_by_id(request_data.get('shipper_id'))
+            
+            if not consignee or not shipper:
+                error_msg = "Shipper or consignee not found"
+                logger.error(f"ShipmentProcessor: {error_msg}")
+                request.status = 'failed'
+                request.failed_reason = error_msg
+                request.save()
+                return {
+                    'request_id': request.id,
+                    'reference_number': request.reference_number,
+                    'success': False,
+                    'error': error_msg,
+                    'courier': None
+                }
             
             logger.info(f"ShipmentProcessor: Looking for available courier for request ID={request.id}")
             courier = self.find_available_courier.find(
@@ -138,9 +147,9 @@ class ShipmentProcessor:
             shipper_city = shipper.city
             
             # Get or create route
-            route, created = Route.objects.get_or_create(
-                origin=shipper_city,
-                destination=consignee_city
+            route, created = repositories.route.get_or_create_by_cities(
+                shipper_city,
+                consignee_city
             )
             
             # Create Weight and Dimensions objects
@@ -170,6 +179,7 @@ class ShipmentProcessor:
             )
 
             logger.info(f"ShipmentProcessor: Calling courier_factory.create_shipment for '{courier.name.lower()}'")
+            logger.info(f"ShipmentProcessor: Request body details - Reference: {reference_number}, Weight: {weight.value} {weight.unit}, Dimensions: {dimensions.height}x{dimensions.width}x{dimensions.length} {dimensions.unit}, Shipper: {shipper.city}, Consignee: {consignee.city}")
             courier_response = courier_factory.create_shipment(
                 courier.name.lower(), 
                 courier_request, 

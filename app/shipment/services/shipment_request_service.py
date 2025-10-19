@@ -1,6 +1,8 @@
+import logging
 from django.db import transaction
-from core.models import ShipmentType, Route
-from ..models import Shipper, Consignee, ShipmentRequest
+from ..repositories.repository_factory import repositories
+
+logger = logging.getLogger(__name__)
 
 
 class ShipmentRequestService:
@@ -10,10 +12,10 @@ class ShipmentRequestService:
     def get_or_create_shipper(shipper_id=None, shipper_data=None):
         """Get existing shipper or create new one."""
         if shipper_id:
-            return Shipper.objects.get(id=shipper_id)
+            return repositories.shipper.get_by_id(shipper_id)
         else:
-            return Shipper.objects.get_or_create(
-                email=shipper_data['email'],
+            return repositories.shipper.get_or_create_by_email(
+                shipper_data['email'],
                 defaults=shipper_data
             )[0]
     
@@ -21,21 +23,28 @@ class ShipmentRequestService:
     def get_or_create_consignee(consignee_id=None, consignee_data=None):
         """Get existing consignee or create new one."""
         if consignee_id:
-            return Consignee.objects.get(id=consignee_id)
+            return repositories.consignee.get_by_id(consignee_id)
         else:
-            return Consignee.objects.get_or_create(
-                email=consignee_data['email'],
+            return repositories.consignee.get_or_create_by_email(
+                consignee_data['email'],
                 defaults=consignee_data
             )[0]
     
     @staticmethod
     def prepare_request_body(validated_data, shipper, consignee):
         """Prepare the JSON request body for storage."""
+        # Handle pickup_date safely
+        pickup_date = validated_data.get('pickup_date')
+        if pickup_date:
+            pickup_date_str = pickup_date.isoformat() if hasattr(pickup_date, 'isoformat') else str(pickup_date)
+        else:
+            pickup_date_str = None
+            
         return {
             'shipment_type_id': validated_data['shipment_type_id'],
             'shipper_id': shipper.id,
             'consignee_id': consignee.id,
-            'pickup_date': validated_data['pickup_date'].isoformat() if hasattr(validated_data['pickup_date'], 'isoformat') else str(validated_data['pickup_date']),
+            'pickup_date': pickup_date_str,
             'weight': float(validated_data['weight']),
             'weight_unit': validated_data.get('weight_unit', 'kg'),
             'dimensions': validated_data['dimensions'],
@@ -48,9 +57,7 @@ class ShipmentRequestService:
     @classmethod
     def check_existing_request(cls, reference_number):
         """Check if a shipment request with the same reference number already exists."""
-        existing_request = ShipmentRequest.objects.filter(
-            reference_number=reference_number
-        ).order_by('-created_at').first()
+        existing_request = repositories.shipment_request.get_latest_by_reference_number(reference_number)
         
         if existing_request:
             if existing_request.status in ['pending', 'processing']:
@@ -115,8 +122,9 @@ class ShipmentRequestService:
             )
             
             request_body = cls.prepare_request_body(validated_data, shipper, consignee)
+            logger.info(f"ShipmentRequestService: Creating shipment request with body: {request_body}")
             
-            shipment_request = ShipmentRequest.objects.create(
+            shipment_request = repositories.shipment_request.create(
                 reference_number=validated_data['reference_number'],
                 request_body=request_body,
                 status='pending'

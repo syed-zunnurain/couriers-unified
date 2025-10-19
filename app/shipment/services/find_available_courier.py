@@ -1,5 +1,5 @@
 import logging
-from core.models import Courier, CourierShipmentType, CourierRoute
+from ..repositories.repository_factory import repositories
 
 logger = logging.getLogger(__name__)
 
@@ -10,18 +10,13 @@ class FindAvailableCourier:
     def find(self, shipment_type_id, shipper_city, consignee_city):
         """Find an available courier for the given shipment type and route."""
         try:
-            courier_shipment_types = CourierShipmentType.objects.filter(
-                shipment_type_id=shipment_type_id,
-                courier__is_active=True
-            )
+            # Get available couriers for the shipment type
+            courier_shipment_types = repositories.courier_shipment_type.get_by_shipment_type(shipment_type_id)
             
-            courier_routes = CourierRoute.objects.filter(
-                route__origin__iexact=shipper_city,
-                route__destination__iexact=consignee_city,
-                is_active=True,
-                courier__is_active=True
-            )
+            # Get available couriers for the route
+            courier_routes = repositories.courier_route.get_by_route(shipper_city, consignee_city)
             
+            # Find intersection of couriers that support both shipment type and route
             available_courier_ids = set()
             for cst in courier_shipment_types:
                 for cr in courier_routes:
@@ -29,7 +24,7 @@ class FindAvailableCourier:
                         available_courier_ids.add(cst.courier_id)
             
             if available_courier_ids:
-                return Courier.objects.filter(id__in=available_courier_ids).first()
+                return repositories.courier.get_by_id(list(available_courier_ids)[0])
             else:
                 return None
                 

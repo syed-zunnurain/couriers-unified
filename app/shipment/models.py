@@ -52,7 +52,9 @@ class Shipment(models.Model):
         max_length=10,
         help_text="Unit of measurement for dimensions (e.g., cm, in)"
     )
-    weight = models.PositiveIntegerField(
+    weight = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
         help_text="Weight of the shipment"
     )
     weight_unit = models.CharField(

@@ -17,8 +17,8 @@ class Command(BaseCommand):
                 'name': 'DHL',
                 'config': {
                     'base_url': 'https://api-sandbox.dhl.com',
-                    'api_key': '7c0IGVjeE28JK7TeGiul4mxOGfgGnJHE',
-                    'api_secret': 'zKvU2mpMmA6BsSQI',
+                    'api_key': 'jOE9bVeBIKVZAOI7hLdU2dNRdxNwDhBT',
+                    'api_secret': 'FJ4miwlowXTsRPog',
                     'username': 'user-valid',
                     'password': 'SandboxPasswort2023!',
                     'is_active': True

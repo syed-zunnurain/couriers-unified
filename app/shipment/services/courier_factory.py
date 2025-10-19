@@ -2,7 +2,8 @@ import logging
 from typing import Dict, Any, Optional
 from .courier_interface import CourierInterface, CourierRequest, CourierResponse
 from .couriers.dhl_courier import DHLCourier
-from core.models import CourierConfig
+from .couriers.base_courier import BaseCourier
+from ..repositories.repository_factory import repositories
 
 logger = logging.getLogger(__name__)
 
@@ -28,12 +29,17 @@ class CourierFactory:
         
         try:
             logger.info(f"CourierFactory: Looking up courier configuration for '{courier_name}' in database")
-            courier_config = CourierConfig.objects.select_related('courier').get(
-                courier__name__iexact=courier_name,
-                is_active=True
-            )
+            courier_config = repositories.courier_config.get_by_courier_name(courier_name)
+            if not courier_config:
+                return None
             logger.info(f"CourierFactory: Found courier configuration for '{courier_name}'")
-        except CourierConfig.DoesNotExist:
+            
+            # Get the courier object if not provided
+            if not courier_obj:
+                courier_obj = courier_config.courier
+                
+        except Exception as e:
+            logger.error(f"CourierFactory: Error getting courier config: {str(e)}")
             return None
         
         courier_class = self.COURIER_CLASSES[courier_name]
@@ -76,7 +82,7 @@ class CourierFactory:
     
     def get_available_couriers(self) -> list:
         """Get list of available courier names from database."""
-        return list(CourierConfig.objects.filter(is_active=True).values_list('courier__name', flat=True))
+        return [config.courier.name for config in repositories.courier_config.get_active_configs()]
 
 
 courier_factory = CourierFactory()

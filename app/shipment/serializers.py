@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from core.models import ShipmentType, Route
 from .models import Shipper, Consignee, ShipmentRequest
+from .repositories.repository_factory import repositories
 
 
 class ShipperSerializer(serializers.ModelSerializer):
@@ -9,6 +10,9 @@ class ShipperSerializer(serializers.ModelSerializer):
     class Meta:
         model = Shipper
         fields = ['name', 'address', 'postal_code', 'city', 'country', 'phone', 'email']
+        extra_kwargs = {
+            'postal_code': {'required': False, 'allow_blank': True}
+        }
 
 
 class ConsigneeSerializer(serializers.ModelSerializer):
@@ -17,6 +21,9 @@ class ConsigneeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Consignee
         fields = ['name', 'address', 'postal_code', 'city', 'country', 'phone', 'email']
+        extra_kwargs = {
+            'postal_code': {'required': False, 'allow_blank': True}
+        }
 
 
 class ShipmentRequestCreateSerializer(serializers.Serializer):
@@ -39,7 +46,7 @@ class ShipmentRequestCreateSerializer(serializers.Serializer):
         child=serializers.DictField(),
         help_text="List of items in the shipment"
     )
-    pickup_date = serializers.DateField()
+    pickup_date = serializers.DateField(required=False, allow_null=True)
     weight = serializers.DecimalField(max_digits=10, decimal_places=2)
     weight_unit = serializers.CharField(
         max_length=10,
@@ -78,11 +85,7 @@ class ShipmentRequestCreateSerializer(serializers.Serializer):
         # Check if shipment with this reference number already exists
         reference_number = data.get('reference_number')
         if reference_number:
-            from shipment.models import ShipmentRequest
-            existing_shipment = ShipmentRequest.objects.filter(
-                reference_number=reference_number,
-                status='completed'
-            ).first()
+            existing_shipment = repositories.shipment.get_latest_by_reference_number(reference_number)
             
             if existing_shipment:
                 # Return the existing shipment data instead of creating new one
