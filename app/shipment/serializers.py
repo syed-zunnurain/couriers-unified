@@ -42,10 +42,6 @@ class ShipmentRequestCreateSerializer(serializers.Serializer):
     consignee = ConsigneeSerializer(required=False)
     
     # Shipment details
-    items = serializers.ListField(
-        child=serializers.DictField(),
-        help_text="List of items in the shipment"
-    )
     pickup_date = serializers.DateField(required=False, allow_null=True)
     weight = serializers.DecimalField(max_digits=10, decimal_places=2)
     weight_unit = serializers.CharField(
@@ -121,7 +117,7 @@ class ShipmentRequestCreateSerializer(serializers.Serializer):
         return value
     
     def _validate_cities_match_route(self, data):
-        """Validate that a route exists from shipper's city to consignee's city."""
+        """Validate that a route exists from shipper's city to consignee's city and couriers are available."""
         
         # Get shipper city
         shipper_city = None
@@ -157,3 +153,20 @@ class ShipmentRequestCreateSerializer(serializers.Serializer):
                     f"No route found from '{shipper_city}' to '{consignee_city}'. "
                     f"Please check available routes or contact support."
                 )
+            
+            # Check if any couriers are available for this route and shipment type
+            self._validate_courier_availability(data.get('shipment_type_id'), shipper_city, consignee_city)
+    
+    def _validate_courier_availability(self, shipment_type_id, shipper_city, consignee_city):
+        """Validate that at least one courier is available for the given route and shipment type."""
+        from .services.couriers.find_available_courier import FindAvailableCourier
+        
+        finder = FindAvailableCourier()
+        available_courier = finder.find(shipment_type_id, shipper_city, consignee_city)
+        
+        if not available_courier:
+            raise serializers.ValidationError(
+                f"No couriers are available for shipment type ID {shipment_type_id} "
+                f"on route from '{shipper_city}' to '{consignee_city}'. "
+                f"Please try a different shipment type or contact support."
+            )

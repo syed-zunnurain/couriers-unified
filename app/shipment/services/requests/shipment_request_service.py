@@ -1,6 +1,7 @@
 import logging
 from django.db import transaction
 from ...repositories.repository_factory import repositories
+from ...schemas.shipment_request_response import ShipmentRequestResponse
 
 logger = logging.getLogger(__name__)
 
@@ -73,40 +74,12 @@ class ShipmentRequestService:
         
         if validated_data.get('action') == 'existing_shipment_found':
             existing_shipment = validated_data.get('existing_shipment')
-            return {
-                'action': 'existing_shipment_found',
-                'shipment': existing_shipment,
-                'message': 'Shipment with this reference number already exists',
-                'status_code': 200,
-                'data': {
-                    'id': existing_shipment.id,
-                    'reference_number': existing_shipment.reference_number,
-                    'courier': existing_shipment.courier.name,
-                    'tracking_number': existing_shipment.courier_external_id,
-                    'status': 'completed',
-                    'created_at': existing_shipment.created_at
-                }
-            }
+            return ShipmentRequestResponse.create_response('existing_shipment', existing_shipment=existing_shipment)
         
         existing_request, status = cls.check_existing_request(reference_number)
         
         if status == 'already_processing':
-            return {
-                'action': 'already_exists',
-                'shipment_request': existing_request,
-                'shipper_id': existing_request.request_body.get('shipper_id'),
-                'consignee_id': existing_request.request_body.get('consignee_id'),
-                'message': 'Shipment request with this reference number is already under process',
-                'status_code': 200,
-                'data': {
-                    'id': existing_request.id,
-                    'reference_number': existing_request.reference_number,
-                    'status': existing_request.status,
-                    'created_at': existing_request.created_at,
-                    'shipper_id': existing_request.request_body.get('shipper_id'),
-                    'consignee_id': existing_request.request_body.get('consignee_id')
-                }
-            }
+            return ShipmentRequestResponse.create_response('already_processing', shipment_request=existing_request)
         
         with transaction.atomic():
             shipper = cls.get_or_create_shipper(
@@ -128,19 +101,9 @@ class ShipmentRequestService:
                 status='pending'
             )
             
-            return {
-                'action': 'created',
-                'shipment_request': shipment_request,
-                'shipper': shipper,
-                'consignee': consignee,
-                'message': 'Shipment request created successfully',
-                'status_code': 201,
-                'data': {
-                    'id': shipment_request.id,
-                    'reference_number': shipment_request.reference_number,
-                    'status': shipment_request.status,
-                    'created_at': shipment_request.created_at,
-                    'shipper_id': shipper.id,
-                    'consignee_id': consignee.id
-                }
-            }
+            return ShipmentRequestResponse.create_response(
+                'new',
+                shipment_request=shipment_request,
+                shipper_id=shipper.id,
+                consignee_id=consignee.id
+            )

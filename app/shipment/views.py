@@ -26,12 +26,8 @@ def create_shipment_request(request):
         result = ShipmentRequestService.create_shipment_request(serializer.validated_data)
         
         return Response(
-            {
-                'success': True,
-                'message': result['message'],
-                'data': result['data']
-            },
-            status=result['status_code']
+            result.to_dict(),
+            status=result.status_code
         )
     
     except Exception as e:

@@ -1,5 +1,6 @@
 
 from django.db import models
+from .utils.encryption import encryption_manager
 
 
 class Courier(models.Model):
@@ -131,27 +132,24 @@ class CourierConfig(models.Model):
     base_url = models.URLField(
         help_text="Base URL for the courier's API"
     )
-    api_key = models.CharField(
-        max_length=500, 
-        help_text="API key for authentication"
+    # Encrypted fields - stored as encrypted text
+    _api_key = models.TextField(
+        help_text="Encrypted API key for authentication"
     )
-    api_secret = models.CharField(
-        max_length=500, 
+    _api_secret = models.TextField(
         blank=True, 
         null=True,
-        help_text="API secret for authentication (optional)"
+        help_text="Encrypted API secret for authentication (optional)"
     )
-    username = models.CharField(
-        max_length=255, 
+    _username = models.TextField(
         blank=True, 
         null=True,
-        help_text="Username for authentication (optional)"
+        help_text="Encrypted username for authentication (optional)"
     )
-    password = models.CharField(
-        max_length=255, 
+    _password = models.TextField(
         blank=True, 
         null=True,
-        help_text="Password for authentication (optional)"
+        help_text="Encrypted password for authentication (optional)"
     )
     is_active = models.BooleanField(
         default=True, 
@@ -169,3 +167,44 @@ class CourierConfig(models.Model):
     
     def __str__(self):
         return f"{self.courier.name} Configuration"
+    
+    # Property methods for encrypted fields
+    @property
+    def api_key(self):
+        """Get decrypted API key."""
+        return encryption_manager.decrypt(self._api_key) if self._api_key else ""
+    
+    @api_key.setter
+    def api_key(self, value):
+        """Set encrypted API key."""
+        self._api_key = encryption_manager.encrypt(value) if value else ""
+    
+    @property
+    def api_secret(self):
+        """Get decrypted API secret."""
+        return encryption_manager.decrypt(self._api_secret) if self._api_secret else ""
+    
+    @api_secret.setter
+    def api_secret(self, value):
+        """Set encrypted API secret."""
+        self._api_secret = encryption_manager.encrypt(value) if value else ""
+    
+    @property
+    def username(self):
+        """Get decrypted username."""
+        return encryption_manager.decrypt(self._username) if self._username else ""
+    
+    @username.setter
+    def username(self, value):
+        """Set encrypted username."""
+        self._username = encryption_manager.encrypt(value) if value else ""
+    
+    @property
+    def password(self):
+        """Get decrypted password."""
+        return encryption_manager.decrypt(self._password) if self._password else ""
+    
+    @password.setter
+    def password(self, value):
+        """Set encrypted password."""
+        self._password = encryption_manager.encrypt(value) if value else ""
