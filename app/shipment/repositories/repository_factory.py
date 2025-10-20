@@ -2,6 +2,7 @@
 
 from .shipment_repository import ShipmentRepository
 from .shipment_request_repository import ShipmentRequestRepository
+from .shipment_label_repository import ShipmentLabelRepository
 from .shipper_consignee_repository import ShipperRepository, ConsigneeRepository
 from core.repositories.courier_repository import (
     CourierRepository,
@@ -20,6 +21,7 @@ class RepositoryFactory:
         # Initialize all repositories
         self._shipment_repository = None
         self._shipment_request_repository = None
+        self._shipment_label_repository = None
         self._shipper_repository = None
         self._consignee_repository = None
         self._courier_repository = None
@@ -42,6 +44,13 @@ class RepositoryFactory:
         if self._shipment_request_repository is None:
             self._shipment_request_repository = ShipmentRequestRepository()
         return self._shipment_request_repository
+    
+    @property
+    def shipment_label(self) -> ShipmentLabelRepository:
+        """Get shipment label repository."""
+        if self._shipment_label_repository is None:
+            self._shipment_label_repository = ShipmentLabelRepository()
+        return self._shipment_label_repository
     
     @property
     def shipper(self) -> ShipperRepository:

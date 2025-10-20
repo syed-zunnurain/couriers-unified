@@ -6,6 +6,7 @@ from ...schemas.shipment_response import ShipmentResponse
 from ..http_clients.dhl_client import DHLHttpClient
 from ..mapping.dhl.dhl_payload_builder import DHLPayloadBuilder
 from ..mapping.dhl.dhl_response_mapper import DHLResponseMapper
+from ..mapping.dhl.dhl_label_response_parser import DHLLabelResponseParser
 
 logger = logging.getLogger(__name__)
 
@@ -34,3 +35,49 @@ class DHLCourier(BaseCourier):
             response_data.get('data', {}),
             response_data.get('success', False)
         )
+    
+    def fetch_label(self, courier_external_id: str) -> Dict[str, Any]:
+        """
+        Fetch label from DHL API.
+        
+        Args:
+            courier_external_id: The courier external ID
+            
+        Returns:
+            Dict containing label data or error
+        """
+        try:
+            logger.info(f"DHL: Fetching label for shipment {courier_external_id}")
+            
+            # Use dedicated get_label method
+            response = self.http_client.get_label(courier_external_id)
+            
+            if response.get('success') and response.get('data'):
+                # Parse successful response using dedicated parser
+                label_data = DHLLabelResponseParser.parse_success_response(response['data'])
+                if label_data:
+                    return label_data
+                else:
+                    return {
+                        'success': False,
+                        'error': 'Label URL not found in DHL response',
+                        'error_code': 'LABEL_URL_NOT_FOUND'
+                    }
+            else:
+                # Parse error response using dedicated parser
+                error_info = DHLLabelResponseParser.parse_error_response(
+                    response.get('error', 'Failed to fetch label from DHL')
+                )
+                return {
+                    'success': False,
+                    'error': error_info['error_message'],
+                    'error_code': error_info['error_code']
+                }
+                
+        except Exception as e:
+            logger.error(f"DHL: Error fetching label: {str(e)}")
+            return {
+                'success': False,
+                'error': f'DHL API error: {str(e)}',
+                'error_code': 'COURIER_API_ERROR'
+            }

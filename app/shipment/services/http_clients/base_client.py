@@ -83,6 +83,57 @@ class BaseHttpClient(ABC):
             logger.error(f"BaseHttpClient: Request failed: {str(e)}")
             raise
     
+    def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None, 
+            headers: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+        """
+        Make GET request with error handling.
+        
+        Args:
+            endpoint: API endpoint
+            params: Query parameters
+            headers: Additional headers
+            
+        Returns:
+            Dict containing response data or error
+        """
+        try:
+            url = f"{self.base_url}/{endpoint.lstrip('/')}"
+            request_headers = {**self._get_headers(), **(headers or {})}
+            
+            logger.info(f"BaseHttpClient: Making GET request to {url}")
+            if params:
+                logger.info(f"BaseHttpClient: Query parameters: {params}")
+            
+            response = self.session.get(
+                url=url,
+                params=params,
+                headers=request_headers,
+                timeout=self.timeout
+            )
+            
+            logger.info(f"BaseHttpClient: Response status: {response.status_code}")
+            
+            if response.status_code == 200:
+                return {
+                    'success': True,
+                    'data': response.json() if response.content else {},
+                    'status_code': response.status_code
+                }
+            else:
+                return {
+                    'success': False,
+                    'error': f'HTTP {response.status_code}: {response.text}',
+                    'status_code': response.status_code
+                }
+                
+        except requests.exceptions.RequestException as e:
+            logger.error(f"BaseHttpClient: GET request failed: {str(e)}")
+            return {
+                'success': False,
+                'error': str(e),
+                'status_code': 0
+            }
+    
     @abstractmethod
     def create_shipment(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         """Create shipment with the courier."""

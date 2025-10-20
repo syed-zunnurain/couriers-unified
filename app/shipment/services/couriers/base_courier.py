@@ -31,6 +31,19 @@ class BaseCourier(ABC):
         """Map courier response to standardized ShipmentResponse."""
         pass
     
+    @abstractmethod
+    def fetch_label(self, courier_external_id: str) -> Dict[str, Any]:
+        """
+        Fetch label from courier API.
+        
+        Args:
+            courier_external_id: The courier external ID
+            
+        Returns:
+            Dict containing label data or error
+        """
+        pass
+    
     def create_shipment(self, request: ShipmentRequest, shipment_type_id: int = None) -> ShipmentResponse:
         """
         Create shipment with the courier.

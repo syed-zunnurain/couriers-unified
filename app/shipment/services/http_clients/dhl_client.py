@@ -163,3 +163,32 @@ class DHLHttpClient(BaseHttpClient):
                 'data': None,
                 'status_code': 0
             }
+    
+    def get_label(self, courier_external_id: str) -> Dict[str, Any]:
+        """
+        Get shipment label from DHL API.
+        
+        Args:
+            courier_external_id: The courier external ID
+            
+        Returns:
+            Response data from DHL API
+        """
+        try:
+            endpoint = "parcel/de/shipping/v2/orders"
+            params = {
+                'shipment': courier_external_id,
+                'docFormat': 'PDF',
+                'includeDocs': 'URL'
+            }
+            
+            logger.info(f"DHLHttpClient: Getting label for shipment {courier_external_id}")
+            return self.get(endpoint, params=params)
+                
+        except Exception as e:
+            logger.error(f"DHLHttpClient: Error getting label: {str(e)}")
+            return {
+                'success': False,
+                'error': f"DHL API error: {str(e)}",
+                'status_code': 0
+            }

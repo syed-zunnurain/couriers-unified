@@ -49,7 +49,7 @@ class ShipmentCreationService:
                 shipment = repositories.shipment.create_shipment(
                     courier_id=courier.id,
                     shipment_type_id=shipment_type.id,
-                    courier_external_id=response.courier_reference or '',
+                    courier_external_id=response.tracking_number,
                     reference_number=request.reference_number,
                     shipper_id=request.shipper.id,
                     route_id=request.route.id,

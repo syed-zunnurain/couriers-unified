@@ -14,9 +14,6 @@ class DHLProductMapper:
         'V01PAK': 'NORMAL',                    # DHL Paket -> NORMAL
         'V53WPAK': 'URGENT',                   # DHL Express Paket -> URGENT
         'V54EPAK': 'SAME_DAY_DELIVERY',        # DHL Express Paket Plus -> SAME_DAY_DELIVERY
-        'V55PAK': 'NORMAL',                    # DHL Paket Economy -> NORMAL
-        'V62WP': 'URGENT',                     # DHL Express Worldwide -> URGENT
-        'V66WPI': 'URGENT'                     # DHL Express Worldwide Import -> URGENT
     }
     
     # DHL Shipment Type Mappings (based on actual seed data)
@@ -24,12 +21,6 @@ class DHLProductMapper:
         'NORMAL': 'V01PAK',                    # DHL Paket (standard)
         'URGENT': 'V53WPAK',                   # DHL Express Paket
         'SAME_DAY_DELIVERY': 'V54EPAK',        # DHL Express Paket Plus
-        'standard': 'V01PAK',                  # Fallback for lowercase
-        'express': 'V53WPAK',                  # Fallback for lowercase
-        'express_plus': 'V54EPAK',             # Fallback for lowercase
-        'economy': 'V55PAK',                   # Fallback for lowercase
-        'express_worldwide': 'V62WP',          # Fallback for lowercase
-        'express_worldwide_import': 'V66WPI'   # Fallback for lowercase
     }
     
     @classmethod

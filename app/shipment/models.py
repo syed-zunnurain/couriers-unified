@@ -160,3 +160,45 @@ class ShipmentRequest(models.Model):
     
     def __str__(self):
         return f"ShipmentRequest {self.id} - {self.status}"
+
+
+class ShipmentLabel(models.Model):
+    """Model representing shipment labels with URL and format information."""
+    
+    shipment = models.ForeignKey(
+        'Shipment',
+        on_delete=models.CASCADE,
+        help_text="The shipment this label belongs to"
+    )
+    reference_number = models.CharField(
+        max_length=255,
+        help_text="Reference number for this label"
+    )
+    url = models.URLField(
+        max_length=500,
+        help_text="URL to download the label"
+    )
+    format = models.CharField(
+        max_length=50,
+        help_text="Format of the label (e.g., PDF, PNG, ZPL)"
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Whether this label is currently active"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'shipment_labels'
+        ordering = ['-created_at']
+        verbose_name = 'Shipment Label'
+        verbose_name_plural = 'Shipment Labels'
+        indexes = [
+            models.Index(fields=['shipment_id']),
+            models.Index(fields=['reference_number']),
+            models.Index(fields=['is_active']),
+        ]
+    
+    def __str__(self):
+        return f"ShipmentLabel {self.id} - {self.reference_number}"

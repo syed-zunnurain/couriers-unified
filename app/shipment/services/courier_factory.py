@@ -80,6 +80,31 @@ class CourierFactory:
                 error_message=f"Failed to create shipment with {courier_name}: {str(e)}"
             )
     
+    def fetch_label(self, courier_name: str, courier_external_id: str) -> Dict[str, Any]:
+        """Fetch label with specified courier."""
+        logger.info(f"CourierFactory: Fetching label with courier '{courier_name}'")
+        try:
+            logger.info(f"CourierFactory: Getting courier instance for '{courier_name}'")
+            courier = self.get_courier_instance(courier_name)
+            if not courier:
+                logger.error(f"CourierFactory: Courier '{courier_name}' not found or not configured")
+                return {
+                    'success': False,
+                    'error': f"Courier '{courier_name}' not found or not configured",
+                    'error_code': 'COURIER_NOT_FOUND'
+                }
+            
+            logger.info(f"CourierFactory: Found courier instance '{courier.courier_name}', calling fetch_label")
+            response = courier.fetch_label(courier_external_id)
+            logger.info(f"CourierFactory: Received response from courier: success={response.get('success', False)}")
+            return response
+        except Exception as e:
+            return {
+                'success': False,
+                'error': f"Failed to fetch label with {courier_name}: {str(e)}",
+                'error_code': 'COURIER_API_ERROR'
+            }
+    
     def get_available_couriers(self) -> list:
         """Get list of available courier names from database."""
         return [config.courier.name for config in repositories.courier_config.get_active_configs()]
