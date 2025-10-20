@@ -87,6 +87,9 @@ DATABASES = {
     }
 }
 
+# Webhook API Keys
+DHL_WEBHOOK_API_KEY = os.environ.get('DHL_WEBHOOK_API_KEY', 'dhl-webhook-secret-key-2024')
+
 
 
 

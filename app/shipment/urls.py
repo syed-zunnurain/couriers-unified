@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import webhook_views
 
 urlpatterns = [
     # Shipment request endpoints
@@ -10,4 +11,7 @@ urlpatterns = [
     
     # Shipment tracking endpoints
     path('shipments/<str:reference_number>/track/', views.track_shipment, name='track_shipment'),
+    
+    # Webhook endpoints
+    path('webhooks/dhl/', webhook_views.dhl_webhook, name='dhl_webhook'),
 ]

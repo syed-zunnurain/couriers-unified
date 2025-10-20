@@ -9,9 +9,9 @@ from datetime import datetime
 class TrackingLocation:
     """Standardized location information."""
     address: str
-    city: str
     country: str
     postal_code: str
+    city: str = ''  # Optional city field
 
 
 @dataclass
@@ -57,7 +57,6 @@ class TrackingResponse:
             location_data = event_data.get('location', {})
             location = TrackingLocation(
                 address=location_data.get('address', ''),
-                city=location_data.get('city', ''),
                 country=location_data.get('country', ''),
                 postal_code=location_data.get('postal_code', '')
             )
@@ -73,7 +72,6 @@ class TrackingResponse:
         current_location_data = data.get('current_location', {})
         current_location = TrackingLocation(
             address=current_location_data.get('address', ''),
-            city=current_location_data.get('city', ''),
             country=current_location_data.get('country', ''),
             postal_code=current_location_data.get('postal_code', '')
         )
@@ -81,17 +79,17 @@ class TrackingResponse:
         origin_data = data.get('origin', {})
         origin = TrackingLocation(
             address=origin_data.get('address', ''),
-            city=origin_data.get('city', ''),
             country=origin_data.get('country', ''),
-            postal_code=origin_data.get('postal_code', '')
+            postal_code=origin_data.get('postal_code', ''),
+            city=origin_data.get('city', '')
         )
 
         destination_data = data.get('destination', {})
         destination = TrackingLocation(
             address=destination_data.get('address', ''),
-            city=destination_data.get('city', ''),
             country=destination_data.get('country', ''),
-            postal_code=destination_data.get('postal_code', '')
+            postal_code=destination_data.get('postal_code', ''),
+            city=destination_data.get('city', '')
         )
 
         details_data = data.get('details', {})
@@ -122,13 +120,11 @@ class TrackingResponse:
         """Convert TrackingResponse to dictionary."""
         return {
             'success': self.success,
-            'tracking_number': self.tracking_number,
             'service': self.service,
             'current_status': self.current_status,
             'status_description': self.status_description,
             'current_location': {
                 'address': self.current_location.address,
-                'city': self.current_location.city,
                 'country': self.current_location.country,
                 'postal_code': self.current_location.postal_code
             },
@@ -139,7 +135,6 @@ class TrackingResponse:
                     'description': event.description,
                     'location': {
                         'address': event.location.address,
-                        'city': event.location.city,
                         'country': event.location.country,
                         'postal_code': event.location.postal_code
                     }
@@ -157,11 +152,6 @@ class TrackingResponse:
                 'city': self.destination.city,
                 'country': self.destination.country,
                 'postal_code': self.destination.postal_code
-            },
-            'details': {
-                'product_name': self.details.product_name,
-                'weight': self.details.weight,
-                'references': self.details.references
             },
             'reference_number': self.reference_number,
             'shipment_id': self.shipment_id,

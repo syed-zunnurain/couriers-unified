@@ -6,6 +6,7 @@ from ...models import Shipment
 from ...repositories.repository_factory import repositories
 from ...schemas.shipment_request import ShipmentRequest
 from ...schemas.shipment_response import ShipmentResponse
+from ..status.shipment_status_service import ShipmentStatusService
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +61,17 @@ class ShipmentCreationService:
                     weight_unit=request.weight.unit
                 )
                 
+                # Create initial "created" status
+                ShipmentStatusService.create_status(
+                    shipment=shipment,
+                    status='created',
+                    address=f"{request.shipper.address}, {request.shipper.city}",
+                    postal_code=request.shipper.postal_code,
+                    country=request.shipper.country
+                )
+                
                 logger.info(f"ShipmentCreationService: Created shipment {shipment.id} for reference {request.reference_number}")
+                logger.info(f"ShipmentCreationService: Created initial 'created' status for shipment {shipment.id}")
                 return shipment
                 
         except Exception as e:

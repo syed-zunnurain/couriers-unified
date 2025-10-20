@@ -202,3 +202,51 @@ class ShipmentLabel(models.Model):
     
     def __str__(self):
         return f"ShipmentLabel {self.id} - {self.reference_number}"
+
+
+class ShipmentStatus(models.Model):
+    """Model representing shipment status updates with location information."""
+    
+    shipment = models.ForeignKey(
+        'Shipment',
+        on_delete=models.CASCADE,
+        help_text="The shipment this status update belongs to"
+    )
+    status = models.CharField(
+        max_length=100,
+        help_text="Current status of the shipment (e.g., in_transit, delivered, exception)"
+    )
+    address = models.CharField(
+        max_length=500,
+        blank=True,
+        null=True,
+        help_text="Address where the status update occurred"
+    )
+    postal_code = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        help_text="Postal code of the location"
+    )
+    country = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text="Country where the status update occurred"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'shipment_statuses'
+        ordering = ['-created_at']
+        verbose_name = 'Shipment Status'
+        verbose_name_plural = 'Shipment Statuses'
+        indexes = [
+            models.Index(fields=['shipment_id']),
+            models.Index(fields=['status']),
+            models.Index(fields=['created_at']),
+        ]
+    
+    def __str__(self):
+        return f"ShipmentStatus {self.id} - {self.shipment.reference_number} - {self.status}"
