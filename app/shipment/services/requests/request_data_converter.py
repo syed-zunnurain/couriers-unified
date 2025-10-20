@@ -15,13 +15,11 @@ class RequestDataConverter:
         """Convert request data to CourierRequest format."""
         logger.info(f"RequestDataConverter: Converting request data to CourierRequest format")
         
-        # Get or create route
         route, created = repositories.route.get_or_create_by_cities(
             shipper.city,
             consignee.city
         )
         
-        # Create Weight and Dimensions objects
         weight = Weight(
             value=request_data.get('weight', 0.0),
             unit=request_data.get('weight_unit', 'kg')

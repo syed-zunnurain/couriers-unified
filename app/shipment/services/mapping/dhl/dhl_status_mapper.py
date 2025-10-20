@@ -9,7 +9,6 @@ logger = logging.getLogger(__name__)
 class DHLStatusMapper:
     """Maps DHL-specific statuses to standardized status formats."""
     
-    # DHL Status Mappings
     DHL_STATUS_MAPPING = {
         'OK': 'completed',
         'SUCCESS': 'completed',

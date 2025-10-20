@@ -35,7 +35,6 @@ class CourierFactory:
                 return None
             logger.info(f"CourierFactory: Found courier configuration for '{courier_name}'")
             
-            # Get the courier object if not provided
             if not courier_obj:
                 courier_obj = courier_config.courier
                 

@@ -52,11 +52,9 @@ class DHLCourier(BaseCourier):
         try:
             logger.info(f"DHL: Fetching label for shipment {courier_external_id}")
             
-            # Use dedicated get_label method
             response = self.http_client.get_label(courier_external_id)
             
             if response.get('success') and response.get('data'):
-                # Parse successful response using dedicated parser
                 label_data = DHLLabelResponseParser.parse_success_response(response['data'])
                 if label_data:
                     return label_data
@@ -67,7 +65,6 @@ class DHLCourier(BaseCourier):
                         'error_code': 'LABEL_URL_NOT_FOUND'
                     }
             else:
-                # Parse error response using dedicated parser
                 error_info = DHLLabelResponseParser.parse_error_response(
                     response.get('error', 'Failed to fetch label from DHL')
                 )
@@ -98,19 +95,15 @@ class DHLCourier(BaseCourier):
         try:
             logger.info(f"DHL: Tracking shipment {courier_external_id}")
             
-            # Use dedicated track_shipment method
             response = self.http_client.track_shipment(courier_external_id)
             
             if response.get('success') and response.get('data'):
-                # Parse successful response using dedicated parser
                 tracking_data = DHLTrackingResponseParser.parse_tracking_response(response['data'])
                 if tracking_data:
-                    # Map DHL statuses to standardized statuses and replace original statuses
                     mapped_status = TrackingStatusMapper.map_courier_status('dhl', tracking_data['current_status'])
                     tracking_data['current_status'] = mapped_status['status']
                     tracking_data['status_description'] = mapped_status['description']
                     
-                    # Map all events to standardized statuses and replace original statuses
                     mapped_events = []
                     for event in tracking_data.get('events', []):
                         mapped_event_status = TrackingStatusMapper.map_courier_status('dhl', event['status'])
@@ -126,7 +119,6 @@ class DHLCourier(BaseCourier):
                         'TRACKING_DATA_NOT_FOUND'
                     )
             else:
-                # Parse error response
                 error_info = DHLTrackingResponseParser.parse_error_response(
                     response.get('error', 'Failed to track shipment with DHL')
                 )

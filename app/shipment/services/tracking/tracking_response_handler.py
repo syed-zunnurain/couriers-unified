@@ -19,7 +19,6 @@ class TrackingResponseHandler:
         """
         if result.success:
             data = result.to_dict()
-            # Remove the success key from data since it's redundant
             data.pop('success', None)
             return Response(
                 {

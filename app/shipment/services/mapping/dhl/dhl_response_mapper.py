@@ -19,7 +19,6 @@ class DHLResponseMapper:
         """Map DHL API response to standardized ShipmentResponse."""
         try:
             if not success:
-                # Handle both dict and string responses
                 if isinstance(dhl_response, str):
                     return ShipmentResponse(
                         success=False,
@@ -33,7 +32,6 @@ class DHLResponseMapper:
                         raw_response=dhl_response
                     )
             
-            # Extract data from DHL response
             items = dhl_response.get('items', [])
             if not items:
                 return ShipmentResponse(
@@ -46,7 +44,6 @@ class DHLResponseMapper:
             tracking_number = item.get('shipmentNo', '')
             courier_reference = item.get('shipmentRefNo', '')
             
-            # Map status using DHLStatusMapper
             from .dhl_status_mapper import DHLStatusMapper
             sstatus = item.get('sstatus', {})
             dhl_status = sstatus.get('status', 'UNKNOWN')

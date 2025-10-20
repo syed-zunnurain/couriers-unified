@@ -58,10 +58,8 @@ class LabelCacheService:
             LabelResponse with saved label data or None
         """
         try:
-            # Deactivate any existing labels for this shipment
             self._shipment_label_repo.deactivate_labels_by_shipment(shipment_id)
             
-            # Create new active label
             label = self._shipment_label_repo.create_label(
                 shipment_id=shipment_id,
                 reference_number=reference_number,

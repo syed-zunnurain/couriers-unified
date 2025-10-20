@@ -2,7 +2,6 @@
 
 import logging
 from typing import Dict, Any
-# Lazy import to avoid circular dependency
 from .label_cache_service import LabelCacheService
 from ..shipments.shipment_lookup_service import ShipmentLookupService
 from ...schemas.label_response import LabelResponse
@@ -34,13 +33,11 @@ class ShipmentLabelService:
         try:
             logger.info(f"ShipmentLabelService: Getting label for reference {reference_number}")
             
-            # 1. Try to get from cache first
             cached_label = self._cache_service.get_cached_label(reference_number)
             if cached_label:
                 logger.info(f"ShipmentLabelService: Found cached label for reference {reference_number}")
                 return cached_label
             
-            # 2. If not found, get shipment and fetch from courier
             shipment = self._lookup_service.get_shipment_by_reference(reference_number)
             if not shipment:
                 return LabelResponse.create_error_response(
@@ -48,7 +45,6 @@ class ShipmentLabelService:
                     'SHIPMENT_NOT_FOUND'
                 )
             
-            # 3. Fetch from courier using factory
             if not self._courier_factory:
                 from ..couriers.courier_factory import courier_factory
                 self._courier_factory = courier_factory
@@ -61,7 +57,6 @@ class ShipmentLabelService:
                     label_data['error_code']
                 )
             
-            # 4. Save to cache
             saved_label = self._cache_service.save_label(
                 shipment_id=shipment.id,
                 reference_number=reference_number,

@@ -52,7 +52,6 @@ class TrackingResponse:
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'TrackingResponse':
         """Create TrackingResponse from dictionary."""
-        # Parse events
         events = []
         for event_data in data.get('events', []):
             location_data = event_data.get('location', {})
@@ -71,7 +70,6 @@ class TrackingResponse:
             )
             events.append(event)
 
-        # Parse current location
         current_location_data = data.get('current_location', {})
         current_location = TrackingLocation(
             address=current_location_data.get('address', ''),
@@ -80,7 +78,6 @@ class TrackingResponse:
             postal_code=current_location_data.get('postal_code', '')
         )
 
-        # Parse origin
         origin_data = data.get('origin', {})
         origin = TrackingLocation(
             address=origin_data.get('address', ''),
@@ -89,7 +86,6 @@ class TrackingResponse:
             postal_code=origin_data.get('postal_code', '')
         )
 
-        # Parse destination
         destination_data = data.get('destination', {})
         destination = TrackingLocation(
             address=destination_data.get('address', ''),
@@ -98,7 +94,6 @@ class TrackingResponse:
             postal_code=destination_data.get('postal_code', '')
         )
 
-        # Parse details
         details_data = data.get('details', {})
         details = TrackingDetails(
             product_name=details_data.get('product_name', ''),

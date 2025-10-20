@@ -43,7 +43,6 @@ class LabelResponseHandler:
         error_code = result.get('error_code', 'UNKNOWN_ERROR')
         error_message = result.get('error', 'Unknown error occurred')
         
-        # Map error codes to HTTP status codes
         status_mapping = {
             'SHIPMENT_NOT_FOUND': status.HTTP_404_NOT_FOUND,
             'SHIPMENT_NOT_FOUND_IN_COURIER': status.HTTP_404_NOT_FOUND,
@@ -83,7 +82,6 @@ class LabelResponseHandler:
         """
         if result.success:
             data = result.to_dict()
-            # Remove the success key from data since it's redundant
             data.pop('success', None)
             return Response(
                 {

@@ -2,7 +2,6 @@
 
 import logging
 from typing import List, Dict, Any
-# Lazy import to avoid circular dependency
 from ...repositories.repository_factory import repositories
 
 logger = logging.getLogger(__name__)

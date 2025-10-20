@@ -9,7 +9,6 @@ logger = logging.getLogger(__name__)
 class TrackingStatusMapper:
     """Maps courier-specific tracking statuses to standardized statuses."""
     
-    # Standardized tracking statuses
     STANDARD_STATUSES = {
         'CREATED': 'Shipment created',
         'PICKED_UP': 'Package picked up',
@@ -22,7 +21,6 @@ class TrackingStatusMapper:
         'UNKNOWN': 'Status unknown'
     }
     
-    # DHL status mapping
     DHL_STATUS_MAPPING = {
         'CREATED': 'CREATED',
         'PICKED_UP': 'PICKED_UP',
@@ -53,7 +51,6 @@ class TrackingStatusMapper:
             if courier_name_lower == 'dhl':
                 return cls._map_dhl_status(courier_status)
             else:
-                # Default mapping for unknown couriers
                 return {
                     'status': 'UNKNOWN',
                     'description': f'Unknown status from {courier_name}: {courier_status}'
@@ -77,7 +74,6 @@ class TrackingStatusMapper:
         Returns:
             Dict containing standardized status and description
         """
-        # DHL status mapping logic based on actual DHL response
         dhl_status_upper = dhl_status.upper()
         
         if 'LABEL CREATED' in dhl_status_upper:

@@ -2,7 +2,6 @@
 
 import logging
 from typing import Dict, Any
-# Lazy import to avoid circular dependency
 from ..shipments.shipment_lookup_service import ShipmentLookupService
 from ...schemas.tracking_response import TrackingResponse
 
@@ -31,7 +30,6 @@ class ShipmentTrackingService:
         try:
             logger.info(f"ShipmentTrackingService: Tracking shipment for reference {reference_number}")
             
-            # 1. Get shipment from database
             shipment = self._lookup_service.get_shipment_by_reference(reference_number)
             if not shipment:
                 return TrackingResponse.create_error_response(
@@ -39,7 +37,6 @@ class ShipmentTrackingService:
                     'SHIPMENT_NOT_FOUND'
                 )
             
-            # 2. Track with courier using factory
             if not self._courier_factory:
                 from ..couriers.courier_factory import courier_factory
                 self._courier_factory = courier_factory
@@ -49,7 +46,6 @@ class ShipmentTrackingService:
             if not tracking_response.success:
                 return tracking_response
             
-            # 3. Add reference number and shipment ID to response
             tracking_response.reference_number = reference_number
             tracking_response.shipment_id = shipment.id
             

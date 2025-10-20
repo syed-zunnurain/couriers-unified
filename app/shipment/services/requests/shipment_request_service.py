@@ -33,7 +33,6 @@ class ShipmentRequestService:
     @staticmethod
     def prepare_request_body(validated_data, shipper, consignee):
         """Prepare the JSON request body for storage."""
-        # Handle pickup_date safely
         pickup_date = validated_data.get('pickup_date')
         if pickup_date:
             pickup_date_str = pickup_date.isoformat() if hasattr(pickup_date, 'isoformat') else str(pickup_date)
@@ -72,7 +71,6 @@ class ShipmentRequestService:
         """Create a new shipment request with all related data."""
         reference_number = validated_data['reference_number']
         
-        # Check if existing shipment was found in serializer
         if validated_data.get('action') == 'existing_shipment_found':
             existing_shipment = validated_data.get('existing_shipment')
             return {

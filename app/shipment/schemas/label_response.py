@@ -39,7 +39,6 @@ class LabelResponse:
         }
         
         if self.success:
-            # Only include label data for successful responses
             if self.id is not None:
                 result['id'] = self.id
             if self.reference_number is not None:
@@ -53,7 +52,6 @@ class LabelResponse:
             if self.created_at is not None:
                 result['created_at'] = self.created_at
         else:
-            # Only include error data for failed responses
             if self.error is not None:
                 result['error'] = self.error
             if self.error_code is not None:

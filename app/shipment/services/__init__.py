@@ -1,4 +1,3 @@
-# Services package
 from .requests.shipment_request_service import ShipmentRequestService
 from .couriers.courier_factory import courier_factory
 from .couriers.courier_interface import CourierRequest, CourierResponse

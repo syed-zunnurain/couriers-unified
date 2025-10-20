@@ -28,13 +28,11 @@ class RequestProcessor:
         logger.info(f"RequestProcessor: Starting to process single request ID={request.id}")
         
         with transaction.atomic():
-            # Update request status to processing
             self.status_manager.mark_as_processing(request)
             
             request_data = request.request_body
             logger.info(f"RequestProcessor: Request data for ID={request.id}: shipment_type_id={request_data.get('shipment_type_id')}")
             
-            # Get shipper and consignee objects
             consignee = repositories.consignee.get_by_id(request_data.get('consignee_id'))
             shipper = repositories.shipper.get_by_id(request_data.get('shipper_id'))
             
@@ -50,7 +48,6 @@ class RequestProcessor:
                     'courier': None
                 }
             
-            # Process with courier
             result = self.courier_processor.process_with_courier(
                 request_data, 
                 request.reference_number, 
@@ -58,7 +55,6 @@ class RequestProcessor:
                 consignee
             )
             
-            # Update request status based on result
             if result['success']:
                 self.status_manager.mark_as_completed(request)
                 return {

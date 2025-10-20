@@ -51,11 +51,9 @@ class DHLLabelResponseParser:
             Dict containing error_code and clean error_message
         """
         try:
-            # Default error values
             error_code = 'COURIER_API_ERROR'
             clean_message = 'Failed to fetch label from DHL'
             
-            # Parse different HTTP error types
             if 'HTTP 400' in error_message:
                 return DHLLabelResponseParser._parse_400_error(error_message)
             elif 'HTTP 401' in error_message:
@@ -95,7 +93,6 @@ class DHLLabelResponseParser:
             Dict containing error_code and clean error_message
         """
         try:
-            # Extract JSON from error message
             json_start = error_message.find('{')
             if json_start == -1:
                 return {
@@ -106,7 +103,6 @@ class DHLLabelResponseParser:
             json_str = error_message[json_start:]
             dhl_error = json.loads(json_str)
             
-            # Check for specific DHL error cases
             if 'items' in dhl_error and dhl_error['items']:
                 item = dhl_error['items'][0]
                 if 'sstatus' in item and 'UNKNOWN_SHIPMENT_NUMBER' in str(item['sstatus']):

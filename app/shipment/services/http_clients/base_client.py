@@ -20,7 +20,6 @@ class BaseHttpClient(ABC):
         """Create a configured requests session with retry strategy."""
         session = requests.Session()
         
-        # Configure retry strategy
         retry_strategy = Retry(
             total=3,
             backoff_factor=1,

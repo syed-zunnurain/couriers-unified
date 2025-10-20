@@ -23,7 +23,6 @@ class DHLHttpClient(BaseHttpClient):
         """Get DHL-specific headers with OAuth token."""
         headers = super()._get_headers()
         
-        # Get valid access token
         token = self._get_valid_token()
         if token:
             headers['Authorization'] = f"Bearer {token}"
@@ -34,11 +33,9 @@ class DHLHttpClient(BaseHttpClient):
         """Get a valid access token, fetching a new one if needed."""
         import time
         
-        # Check if we have a valid token
         if self._access_token and self._token_expires_at and time.time() < self._token_expires_at:
             return self._access_token
         
-        # Fetch new token
         return self._fetch_access_token()
     
     def _fetch_access_token(self) -> Optional[str]:
@@ -71,7 +68,6 @@ class DHLHttpClient(BaseHttpClient):
                 token_data = response.json()
                 self._access_token = token_data.get('access_token')
                 
-                # Calculate token expiration (default to 1 hour if not provided)
                 expires_in = token_data.get('expires_in', 3600)
                 import time
                 self._token_expires_at = time.time() + expires_in - 60  # 1 minute buffer
@@ -137,7 +133,6 @@ class DHLHttpClient(BaseHttpClient):
         """
         try:
             endpoint = "track/shipments"
-            # Use hardcoded test tracking number for testing
             test_tracking_number = ""
             params = {
                 'trackingNumber': test_tracking_number,
@@ -147,7 +142,6 @@ class DHLHttpClient(BaseHttpClient):
                 'limit': 5
             }
             
-            # Use test API key for tracking (different from shipment creation)
             headers = {
                 'accept': 'application/json',
                 'DHL-API-Key': 'demo-key'  # Test environment key
@@ -155,7 +149,6 @@ class DHLHttpClient(BaseHttpClient):
             
             logger.info(f"DHLHttpClient: Tracking shipment {tracking_number} (using hardcoded test number: {test_tracking_number})")
             
-            # Use DHL tracking API base URL (different from shipment creation API)
             tracking_base_url = "https://api-test.dhl.com"
             response = self.session.get(
                 f"{tracking_base_url}/{endpoint}",

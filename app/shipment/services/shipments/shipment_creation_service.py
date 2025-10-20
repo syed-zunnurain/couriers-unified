@@ -40,12 +40,10 @@ class ShipmentCreationService:
                 logger.info(f"ShipmentCreationService: Creating new shipment for reference {request.reference_number}")
                 logger.info(f"ShipmentCreationService: Request details - Weight: {request.weight.value} {request.weight.unit}, Dimensions: {request.dimensions.height}x{request.dimensions.width}x{request.dimensions.length} {request.dimensions.unit}, Shipper: {request.shipper.city}, Consignee: {request.consignee.city}, Courier: {courier.name}")
                 
-                # Get shipment type by ID
                 shipment_type = repositories.shipment_type.get_by_id(shipment_type_id)
                 if not shipment_type:
                     raise ValueError(f"ShipmentType with id {shipment_type_id} not found")
                 
-                # Create the shipment record
                 shipment = repositories.shipment.create_shipment(
                     courier_id=courier.id,
                     shipment_type_id=shipment_type.id,

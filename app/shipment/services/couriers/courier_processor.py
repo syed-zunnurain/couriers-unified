@@ -3,7 +3,6 @@
 import logging
 from typing import Dict, Any
 from .find_available_courier import FindAvailableCourier
-# Lazy import to avoid circular dependency
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +17,6 @@ class CourierProcessor:
         """Process the shipment with the assigned courier."""
         logger.info(f"CourierProcessor: Looking for available courier")
         
-        # Find available courier
         courier = self.find_available_courier.find(
             request_data.get('shipment_type_id'),
             shipper.city,
@@ -41,7 +39,6 @@ class CourierProcessor:
         logger.info(f"CourierProcessor: Starting courier processing with courier '{courier.name}'")
         
         try:
-            # Convert request data to courier format
             from ..requests.request_data_converter import RequestDataConverter
             data_converter = RequestDataConverter()
             courier_request = data_converter.convert_to_courier_request(
@@ -51,7 +48,6 @@ class CourierProcessor:
             logger.info(f"CourierProcessor: Calling courier_factory.create_shipment for '{courier.name.lower()}'")
             logger.info(f"CourierProcessor: Request body details - Reference: {reference_number}, Weight: {courier_request.weight.value} {courier_request.weight.unit}, Dimensions: {courier_request.dimensions.height}x{courier_request.dimensions.width}x{courier_request.dimensions.length} {courier_request.dimensions.unit}, Shipper: {shipper.city}, Consignee: {consignee.city}")
             
-            # Lazy import to avoid circular dependency
             from .courier_factory import courier_factory
             
             courier_response = courier_factory.create_shipment(

@@ -9,14 +9,12 @@ logger = logging.getLogger(__name__)
 class DHLProductMapper:
     """Maps DHL-specific product types to standardized shipment types."""
     
-    # DHL Product Type Mappings (based on actual seed data)
     DHL_PRODUCT_MAPPING = {
         'V01PAK': 'NORMAL',                    # DHL Paket -> NORMAL
         'V53WPAK': 'URGENT',                   # DHL Express Paket -> URGENT
         'V54EPAK': 'SAME_DAY_DELIVERY',        # DHL Express Paket Plus -> SAME_DAY_DELIVERY
     }
     
-    # DHL Shipment Type Mappings (based on actual seed data)
     DHL_SHIPMENT_TYPE_MAPPING = {
         'NORMAL': 'V01PAK',                    # DHL Paket (standard)
         'URGENT': 'V53WPAK',                   # DHL Express Paket
