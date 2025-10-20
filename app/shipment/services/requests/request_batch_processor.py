@@ -2,8 +2,8 @@
 
 import logging
 from typing import List, Dict, Any
-from .request_processor import RequestProcessor
-from ..repositories.repository_factory import repositories
+# Lazy import to avoid circular dependency
+from ...repositories.repository_factory import repositories
 
 logger = logging.getLogger(__name__)
 
@@ -11,8 +11,15 @@ logger = logging.getLogger(__name__)
 class RequestBatchProcessor:
     """Handles batch processing of shipment requests following SRP."""
     
-    def __init__(self, request_processor: RequestProcessor = None):
-        self.request_processor = request_processor or RequestProcessor()
+    def __init__(self, request_processor=None):
+        self._request_processor = request_processor
+    
+    @property
+    def request_processor(self):
+        if self._request_processor is None:
+            from .request_processor import RequestProcessor
+            self._request_processor = RequestProcessor()
+        return self._request_processor
     
     def process_requests(self, batch_size: int = 10) -> Dict[str, Any]:
         """Process a batch of shipment requests."""

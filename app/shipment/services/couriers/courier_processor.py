@@ -3,7 +3,7 @@
 import logging
 from typing import Dict, Any
 from .find_available_courier import FindAvailableCourier
-from .courier_factory import courier_factory
+# Lazy import to avoid circular dependency
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ class CourierProcessor:
         
         try:
             # Convert request data to courier format
-            from .request_data_converter import RequestDataConverter
+            from ..requests.request_data_converter import RequestDataConverter
             data_converter = RequestDataConverter()
             courier_request = data_converter.convert_to_courier_request(
                 request_data, reference_number, shipper, consignee
@@ -50,6 +50,9 @@ class CourierProcessor:
 
             logger.info(f"CourierProcessor: Calling courier_factory.create_shipment for '{courier.name.lower()}'")
             logger.info(f"CourierProcessor: Request body details - Reference: {reference_number}, Weight: {courier_request.weight.value} {courier_request.weight.unit}, Dimensions: {courier_request.dimensions.height}x{courier_request.dimensions.width}x{courier_request.dimensions.length} {courier_request.dimensions.unit}, Shipper: {shipper.city}, Consignee: {consignee.city}")
+            
+            # Lazy import to avoid circular dependency
+            from .courier_factory import courier_factory
             
             courier_response = courier_factory.create_shipment(
                 courier.name.lower(), 

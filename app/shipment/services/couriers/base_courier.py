@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional
 from ...schemas.shipment_request import ShipmentRequest
 from ...schemas.shipment_response import ShipmentResponse
+from ...schemas.tracking_response import TrackingResponse
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +42,19 @@ class BaseCourier(ABC):
             
         Returns:
             Dict containing label data or error
+        """
+        pass
+    
+    @abstractmethod
+    def track_shipment(self, courier_external_id: str) -> TrackingResponse:
+        """
+        Track shipment with courier API.
+        
+        Args:
+            courier_external_id: The courier external ID
+            
+        Returns:
+            TrackingResponse containing tracking data or error
         """
         pass
     
@@ -86,7 +100,7 @@ class BaseCourier(ABC):
     def _persist_shipment(self, request: ShipmentRequest, response: ShipmentResponse, shipment_type_id: int):
         """Persist shipment to database."""
         try:
-            from ..shipment_creation_service import ShipmentCreationService
+            from ..shipments.shipment_creation_service import ShipmentCreationService
             shipment = ShipmentCreationService.create_shipment(
                 request, response, self.courier_obj, shipment_type_id
             )

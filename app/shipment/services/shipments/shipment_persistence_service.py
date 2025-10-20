@@ -2,8 +2,8 @@ import logging
 from django.db import transaction
 from shipment.models import Shipment
 from core.models import Courier, ShipmentType
-from .courier_interface import CourierRequest, CourierResponse
-from ..repositories.repository_factory import repositories
+from ..couriers.courier_interface import CourierRequest, CourierResponse
+from ...repositories.repository_factory import repositories
 
 logger = logging.getLogger(__name__)
 

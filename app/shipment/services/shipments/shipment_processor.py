@@ -1,5 +1,5 @@
 import logging
-from .request_batch_processor import RequestBatchProcessor
+from ..requests.request_batch_processor import RequestBatchProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +20,6 @@ class ShipmentProcessor:
     
     def process_single_request(self, request):
         """Process a single shipment request - delegates to request processor."""
-        from .request_processor import RequestProcessor
+        from ..requests.request_processor import RequestProcessor
         processor = RequestProcessor()
         return processor.process_single_request(request)

@@ -3,7 +3,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .serializers import ShipmentRequestCreateSerializer
 from .services import ShipmentRequestService
-from .services.shipment_label_service import ShipmentLabelService
+from .services.labels.shipment_label_service import ShipmentLabelService
+from .services.tracking.shipment_tracking_service import ShipmentTrackingService
 
 
 @api_view(['POST'])
@@ -56,12 +57,42 @@ def get_shipment_label(request, reference_number: str):
         JSON response with label information or error
     """
     try:
-        from .services.label_response_handler import LabelResponseHandler
+        from .services.labels.label_response_handler import LabelResponseHandler
         
         label_service = ShipmentLabelService()
         result = label_service.get_shipment_label_by_reference(reference_number)
         
         return LabelResponseHandler.handle_result(result)
+            
+    except Exception as e:
+        return Response(
+            {
+                'success': False,
+                'message': 'Internal server error',
+                'error': str(e)
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
+def track_shipment(request, reference_number: str):
+    """
+    Track shipment by reference number.
+    
+    Args:
+        reference_number: The shipment reference number (path parameter)
+        
+    Returns:
+        JSON response with tracking information or error
+    """
+    try:
+        from .services.tracking.tracking_response_handler import TrackingResponseHandler
+        
+        tracking_service = ShipmentTrackingService()
+        result = tracking_service.track_shipment_by_reference(reference_number)
+        
+        return TrackingResponseHandler.handle_result(result)
             
     except Exception as e:
         return Response(

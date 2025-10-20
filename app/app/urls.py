@@ -20,4 +20,5 @@ from shipment import views
 urlpatterns = [
     path('api/shipment-requests/', views.create_shipment_request, name='create_shipment_request'),
     path('api/shipment-labels/<str:reference_number>', views.get_shipment_label, name='get_shipment_label'),
+    path('api/shipments/<str:reference_number>/track', views.track_shipment, name='track_shipment'),
 ]

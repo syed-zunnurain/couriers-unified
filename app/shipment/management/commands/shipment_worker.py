@@ -1,6 +1,6 @@
 import logging
 from django.core.management.base import BaseCommand
-from shipment.services.shipment_processor import ShipmentProcessor
+from shipment.services.shipments.shipment_processor import ShipmentProcessor
 
 logger = logging.getLogger(__name__)
 

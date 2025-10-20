@@ -2,10 +2,10 @@ import logging
 from typing import Optional
 from django.db import transaction
 from core.models import Courier
-from ..models import Shipment
-from ..repositories.repository_factory import repositories
-from ..schemas.shipment_request import ShipmentRequest
-from ..schemas.shipment_response import ShipmentResponse
+from ...models import Shipment
+from ...repositories.repository_factory import repositories
+from ...schemas.shipment_request import ShipmentRequest
+from ...schemas.shipment_response import ShipmentResponse
 
 logger = logging.getLogger(__name__)
 

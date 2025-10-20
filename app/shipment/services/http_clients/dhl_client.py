@@ -127,17 +127,42 @@ class DHLHttpClient(BaseHttpClient):
     
     def track_shipment(self, tracking_number: str) -> Dict[str, Any]:
         """
-        Track shipment with DHL API.
+        Track shipment with DHL API using test environment.
         
         Args:
-            tracking_number: The tracking number to look up
+            tracking_number: The tracking number to look up (ignored, using hardcoded test number)
             
         Returns:
             Tracking data from DHL API
         """
         try:
-            endpoint = f"track/shipments?trackingNumber={tracking_number}"
-            response = self._make_request('GET', endpoint)
+            endpoint = "track/shipments"
+            # Use hardcoded test tracking number for testing
+            test_tracking_number = ""
+            params = {
+                'trackingNumber': test_tracking_number,
+                'service': 'express',
+                'language': 'en',
+                'offset': 0,
+                'limit': 5
+            }
+            
+            # Use test API key for tracking (different from shipment creation)
+            headers = {
+                'accept': 'application/json',
+                'DHL-API-Key': 'demo-key'  # Test environment key
+            }
+            
+            logger.info(f"DHLHttpClient: Tracking shipment {tracking_number} (using hardcoded test number: {test_tracking_number})")
+            
+            # Use DHL tracking API base URL (different from shipment creation API)
+            tracking_base_url = "https://api-test.dhl.com"
+            response = self.session.get(
+                f"{tracking_base_url}/{endpoint}",
+                params=params,
+                headers=headers,
+                timeout=self.timeout
+            )
             
             if response.status_code == 200:
                 logger.info(f"DHLHttpClient: Tracking info retrieved for {tracking_number}")

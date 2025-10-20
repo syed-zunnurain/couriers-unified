@@ -1,7 +1,7 @@
 """Service for shipment lookup operations."""
 
 import logging
-from shipment.repositories.repository_factory import repositories
+from ...repositories.repository_factory import repositories
 
 logger = logging.getLogger(__name__)
 

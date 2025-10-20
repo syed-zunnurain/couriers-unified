@@ -1,6 +1,6 @@
 import logging
 from django.db import transaction
-from ..repositories.repository_factory import repositories
+from ...repositories.repository_factory import repositories
 
 logger = logging.getLogger(__name__)
 

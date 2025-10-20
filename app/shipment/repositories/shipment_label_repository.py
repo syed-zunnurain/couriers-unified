@@ -22,6 +22,10 @@ class ShipmentLabelRepository(DjangoRepository):
         """Get label by reference number."""
         return self.first(reference_number=reference_number)
     
+    def get_active_by_reference_number(self, reference_number: str) -> Optional[ShipmentLabel]:
+        """Get active label by reference number."""
+        return self.first(reference_number=reference_number, is_active=True)
+    
     def get_by_format(self, format: str) -> List[ShipmentLabel]:
         """Get labels by format."""
         return self.filter(format=format)

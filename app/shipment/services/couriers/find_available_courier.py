@@ -1,5 +1,5 @@
 import logging
-from ..repositories.repository_factory import repositories
+from ...repositories.repository_factory import repositories
 
 logger = logging.getLogger(__name__)
 

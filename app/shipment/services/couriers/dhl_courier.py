@@ -6,7 +6,10 @@ from ...schemas.shipment_response import ShipmentResponse
 from ..http_clients.dhl_client import DHLHttpClient
 from ..mapping.dhl.dhl_payload_builder import DHLPayloadBuilder
 from ..mapping.dhl.dhl_response_mapper import DHLResponseMapper
-from ..mapping.dhl.dhl_label_response_parser import DHLLabelResponseParser
+from ..labels.dhl_label_response_parser import DHLLabelResponseParser
+from ..tracking.dhl_tracking_response_parser import DHLTrackingResponseParser
+from ..tracking.tracking_status_mapper import TrackingStatusMapper
+from ...schemas.tracking_response import TrackingResponse
 
 logger = logging.getLogger(__name__)
 
@@ -81,3 +84,60 @@ class DHLCourier(BaseCourier):
                 'error': f'DHL API error: {str(e)}',
                 'error_code': 'COURIER_API_ERROR'
             }
+    
+    def track_shipment(self, courier_external_id: str) -> TrackingResponse:
+        """
+        Track shipment with DHL API.
+        
+        Args:
+            courier_external_id: The courier external ID
+            
+        Returns:
+            TrackingResponse containing tracking data or error
+        """
+        try:
+            logger.info(f"DHL: Tracking shipment {courier_external_id}")
+            
+            # Use dedicated track_shipment method
+            response = self.http_client.track_shipment(courier_external_id)
+            
+            if response.get('success') and response.get('data'):
+                # Parse successful response using dedicated parser
+                tracking_data = DHLTrackingResponseParser.parse_tracking_response(response['data'])
+                if tracking_data:
+                    # Map DHL statuses to standardized statuses and replace original statuses
+                    mapped_status = TrackingStatusMapper.map_courier_status('dhl', tracking_data['current_status'])
+                    tracking_data['current_status'] = mapped_status['status']
+                    tracking_data['status_description'] = mapped_status['description']
+                    
+                    # Map all events to standardized statuses and replace original statuses
+                    mapped_events = []
+                    for event in tracking_data.get('events', []):
+                        mapped_event_status = TrackingStatusMapper.map_courier_status('dhl', event['status'])
+                        event['status'] = mapped_event_status['status']
+                        event['description'] = mapped_event_status['description']
+                        mapped_events.append(event)
+                    tracking_data['events'] = mapped_events
+                    
+                    return TrackingResponse.from_dict(tracking_data)
+                else:
+                    return TrackingResponse.create_error_response(
+                        'Tracking data not found in DHL response',
+                        'TRACKING_DATA_NOT_FOUND'
+                    )
+            else:
+                # Parse error response
+                error_info = DHLTrackingResponseParser.parse_error_response(
+                    response.get('error', 'Failed to track shipment with DHL')
+                )
+                return TrackingResponse.create_error_response(
+                    error_info['error_message'],
+                    error_info['error_code']
+                )
+                
+        except Exception as e:
+            logger.error(f"DHL: Error tracking shipment: {str(e)}")
+            return TrackingResponse.create_error_response(
+                f'DHL API error: {str(e)}',
+                'COURIER_API_ERROR'
+            )

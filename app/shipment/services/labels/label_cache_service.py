@@ -2,7 +2,8 @@
 
 import logging
 from typing import Dict, Any, Optional
-from shipment.repositories.repository_factory import repositories
+from ...repositories.repository_factory import repositories
+from ...schemas.label_response import LabelResponse
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +14,7 @@ class LabelCacheService:
     def __init__(self):
         self._shipment_label_repo = repositories.shipment_label
     
-    def get_cached_label(self, reference_number: str) -> Optional[Dict[str, Any]]:
+    def get_cached_label(self, reference_number: str) -> Optional[LabelResponse]:
         """
         Get active label by reference number.
         
@@ -21,20 +22,20 @@ class LabelCacheService:
             reference_number: The shipment reference number
             
         Returns:
-            Label data if found and active, None otherwise
+            LabelResponse if found and active, None otherwise
         """
         try:
-            existing_label = self._shipment_label_repo.get_by_reference_number(reference_number)
-            if existing_label and existing_label.is_active:
+            existing_label = self._shipment_label_repo.get_active_by_reference_number(reference_number)
+            if existing_label:
                 logger.info(f"LabelCacheService: Found active label for reference {reference_number}")
-                return {
-                    'id': existing_label.id,
-                    'reference_number': existing_label.reference_number,
-                    'url': existing_label.url,
-                    'format': existing_label.format,
-                    'is_active': existing_label.is_active,
-                    'created_at': existing_label.created_at.isoformat()
-                }
+                return LabelResponse.create_success_response(
+                    id=existing_label.id,
+                    reference_number=existing_label.reference_number,
+                    url=existing_label.url,
+                    format=existing_label.format,
+                    is_active=existing_label.is_active,
+                    created_at=existing_label.created_at.isoformat()
+                )
             
             return None
             
@@ -43,7 +44,7 @@ class LabelCacheService:
             return None
     
     def save_label(self, shipment_id: int, reference_number: str, 
-                   url: str, format: str) -> Optional[Dict[str, Any]]:
+                   url: str, format: str) -> Optional[LabelResponse]:
         """
         Save label to cache.
         
@@ -54,7 +55,7 @@ class LabelCacheService:
             format: The label format
             
         Returns:
-            Saved label data or None
+            LabelResponse with saved label data or None
         """
         try:
             # Deactivate any existing labels for this shipment
@@ -70,14 +71,14 @@ class LabelCacheService:
             )
             
             logger.info(f"LabelCacheService: Saved label {label.id} for shipment {shipment_id}")
-            return {
-                'id': label.id,
-                'reference_number': label.reference_number,
-                'url': label.url,
-                'format': label.format,
-                'is_active': label.is_active,
-                'created_at': label.created_at.isoformat()
-            }
+            return LabelResponse.create_success_response(
+                id=label.id,
+                reference_number=label.reference_number,
+                url=label.url,
+                format=label.format,
+                is_active=label.is_active,
+                created_at=label.created_at.isoformat()
+            )
             
         except Exception as e:
             logger.error(f"LabelCacheService: Error saving label: {str(e)}")

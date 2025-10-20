@@ -4,10 +4,10 @@ import logging
 from django.utils import timezone
 from django.db import transaction
 from typing import Dict, Any
-from .courier_processor import CourierProcessor
-from .request_status_manager import RequestStatusManager
+from ..couriers.courier_processor import CourierProcessor
+from ..shipments.request_status_manager import RequestStatusManager
 from .request_data_converter import RequestDataConverter
-from ..repositories.repository_factory import repositories
+from ...repositories.repository_factory import repositories
 
 logger = logging.getLogger(__name__)
 
