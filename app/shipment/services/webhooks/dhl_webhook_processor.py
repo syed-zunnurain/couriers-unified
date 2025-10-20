@@ -53,6 +53,19 @@ class DHLWebhookProcessor:
                     'error_code': 'SHIPMENT_NOT_FOUND'
                 }
             
+            # Check if shipment is already cancelled
+            if self._is_shipment_cancelled(shipment):
+                logger.info(f"DHLWebhookProcessor: Shipment {shipment.reference_number} is already cancelled, ignoring webhook")
+                return {
+                    'success': True,
+                    'message': 'Shipment already cancelled, webhook ignored',
+                    'shipment_id': shipment.id,
+                    'reference_number': shipment.reference_number,
+                    'status_entry_id': None,
+                    'mapped_status': None,
+                    'status': 'cancelled_ignored'
+                }
+            
             # Map DHL status to our standardized status
             standardized_status = self._map_dhl_status(webhook_data.status)
             
@@ -208,6 +221,35 @@ class DHLWebhookProcessor:
         except Exception as e:
             logger.error(f"DHLWebhookProcessor: Error checking for duplicate status: {str(e)}")
             # If there's an error checking for duplicates, we'll process the webhook anyway
+            return False
+    
+    def _is_shipment_cancelled(self, shipment: Shipment) -> bool:
+        """
+        Check if the shipment is already cancelled.
+        
+        Args:
+            shipment: Shipment object
+            
+        Returns:
+            True if shipment is cancelled, False otherwise
+        """
+        try:
+            from ...models import ShipmentStatus
+            
+            # Get the latest status for this shipment
+            latest_status = ShipmentStatus.objects.filter(
+                shipment=shipment
+            ).order_by('-created_at').first()
+            
+            if latest_status and latest_status.status.lower() == 'cancelled':
+                logger.info(f"DHLWebhookProcessor: Shipment {shipment.reference_number} has latest status 'cancelled'")
+                return True
+            
+            return False
+            
+        except Exception as e:
+            logger.error(f"DHLWebhookProcessor: Error checking if shipment is cancelled: {str(e)}")
+            # If there's an error checking, we'll process the webhook anyway
             return False
     
     def get_webhook_summary(self, webhook_data: DHLWebhookData) -> Dict[str, Any]:

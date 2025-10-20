@@ -93,7 +93,7 @@ def dhl_webhook(request):
         if result['success']:
             logger.info(f"DHL Webhook: Successfully processed webhook for shipment {result.get('reference_number')}")
             
-            # Check if it's a duplicate
+            # Check if it's a duplicate or cancelled
             if result.get('status') == 'duplicate_ignored':
                 return Response(
                     {
@@ -105,6 +105,21 @@ def dhl_webhook(request):
                             'status_entry_id': result.get('status_entry_id'),
                             'mapped_status': result.get('mapped_status'),
                             'status': 'duplicate_ignored'
+                        }
+                    },
+                    status=status.HTTP_200_OK
+                )
+            elif result.get('status') == 'cancelled_ignored':
+                return Response(
+                    {
+                        'success': True,
+                        'message': 'Shipment already cancelled, webhook ignored',
+                        'data': {
+                            'shipment_id': result.get('shipment_id'),
+                            'reference_number': result.get('reference_number'),
+                            'status_entry_id': result.get('status_entry_id'),
+                            'mapped_status': result.get('mapped_status'),
+                            'status': 'cancelled_ignored'
                         }
                     },
                     status=status.HTTP_200_OK

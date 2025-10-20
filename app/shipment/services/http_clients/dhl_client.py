@@ -182,6 +182,49 @@ class DHLHttpClient(BaseHttpClient):
                 'status_code': 0
             }
     
+    def cancel_shipment(self, courier_external_id: str) -> Dict[str, Any]:
+        """
+        Cancel shipment with DHL API.
+        
+        Args:
+            courier_external_id: The DHL shipment ID
+            
+        Returns:
+            Dict containing cancellation result
+        """
+        try:
+            # Cancel shipment endpoint
+            endpoint = f"parcel/de/shipping/v2/orders?shipment={courier_external_id}&profile=STANDARD_GRUPPENPROFIL"
+            
+            logger.info(f"DHLHttpClient: Cancelling shipment {courier_external_id}")
+            
+            response = self._make_request('DELETE', endpoint)
+            
+            if response.status_code == 200:
+                logger.info(f"DHLHttpClient: Successfully cancelled shipment {courier_external_id}")
+                return {
+                    'success': True,
+                    'data': response.json() if response.content else {},
+                    'status_code': response.status_code
+                }
+            else:
+                logger.warning(f"DHLHttpClient: Cancellation failed with status {response.status_code}")
+                return {
+                    'success': False,
+                    'error': f"DHL API error: HTTP {response.status_code}",
+                    'data': response.text,
+                    'status_code': response.status_code
+                }
+                
+        except Exception as e:
+            logger.error(f"DHLHttpClient: Error cancelling shipment: {str(e)}")
+            return {
+                'success': False,
+                'error': f"Network error: {str(e)}",
+                'data': None,
+                'status_code': 0
+            }
+    
     def get_label(self, courier_external_id: str) -> Dict[str, Any]:
         """
         Get shipment label from DHL API.

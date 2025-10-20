@@ -1,6 +1,7 @@
 import logging
 from typing import Dict, Any
 from .base_courier import BaseCourier
+from .cancellable_courier_interface import CancellableCourierInterface
 from ...schemas.shipment_request import ShipmentRequest
 from ...schemas.shipment_response import ShipmentResponse
 from ..http_clients.dhl_client import DHLHttpClient
@@ -14,7 +15,7 @@ from ...schemas.tracking_response import TrackingResponse
 logger = logging.getLogger(__name__)
 
 
-class DHLCourier(BaseCourier):
+class DHLCourier(BaseCourier, CancellableCourierInterface):
     """DHL courier implementation following SOLID principles."""
     
     def _create_http_client(self):
@@ -133,3 +134,39 @@ class DHLCourier(BaseCourier):
                 f'DHL API error: {str(e)}',
                 'COURIER_API_ERROR'
             )
+    
+    def cancel_shipment(self, courier_external_id: str) -> Dict[str, Any]:
+        """
+        Cancel shipment with DHL API.
+        
+        Args:
+            courier_external_id: The DHL shipment ID
+            
+        Returns:
+            Dict containing cancellation result
+        """
+        try:
+            logger.info(f"DHL: Cancelling shipment {courier_external_id}")
+            
+            # Cancel shipment with DHL (token handled automatically)
+            cancel_response = self.http_client.cancel_shipment(courier_external_id)
+            
+            if cancel_response.get('success'):
+                logger.info(f"DHL: Successfully cancelled shipment {courier_external_id}")
+                return {
+                    'success': True,
+                    'message': 'Shipment cancelled successfully with DHL'
+                }
+            else:
+                logger.warning(f"DHL: Failed to cancel shipment {courier_external_id}: {cancel_response.get('error')}")
+                return {
+                    'success': False,
+                    'message': f"DHL cancellation failed: {cancel_response.get('error')}"
+                }
+                
+        except Exception as e:
+            logger.error(f"DHL: Error cancelling shipment {courier_external_id}: {str(e)}")
+            return {
+                'success': False,
+                'message': f'DHL cancellation error: {str(e)}'
+            }

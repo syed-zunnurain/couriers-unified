@@ -15,6 +15,7 @@ class Command(BaseCommand):
         courier_configs = [
             {
                 'name': 'DHL',
+                'supports_cancellation': True,
                 'config': {
                     'base_url': 'https://api-sandbox.dhl.com',
                     'api_key': 'jOE9bVeBIKVZAOI7hLdU2dNRdxNwDhBT',
@@ -33,10 +34,15 @@ class Command(BaseCommand):
                     courier, created = Courier.objects.get_or_create(
                         name=courier_data['name'],
                         defaults={
-                            'supports_cancellation': True, 
-                            'is_active': True
+                            'is_active': True,
+                            'supports_cancellation': courier_data.get('supports_cancellation', False)
                         }
                     )
+                    
+                    # Update supports_cancellation if it exists in the data
+                    if 'supports_cancellation' in courier_data:
+                        courier.supports_cancellation = courier_data['supports_cancellation']
+                        courier.save()
                     
                     if created:
                         self.stdout.write(f'Created {courier_data["name"]} courier')
