@@ -109,91 +109,6 @@ graph TB
     L --> G
 ```
 
-### Detailed Component Architecture
-
-```mermaid
-graph TB
-    subgraph "Django Application"
-        subgraph "API Endpoints"
-            A1["POST /shipment-requests/"]
-            A2["GET /shipment-labels/"]
-            A3["GET /shipments/track/"]
-            A4["POST /shipments/cancel/"]
-            A5["POST /webhooks/dhl/"]
-        end
-        
-        subgraph "Service Layer"
-            B1[ShipmentRequestService]
-            B2[ShipmentLabelService]
-            B3[ShipmentTrackingService]
-            B4[ShipmentCancellationService]
-            B5[WebhookProcessor]
-        end
-        
-        subgraph "Courier Integration"
-            C1[CourierFactory]
-            C2[BaseCourier]
-            C3[DHLCourier]
-            C4[HTTP Clients]
-            C5[Response Mappers]
-        end
-        
-        subgraph "Data Access"
-            D1[Repository Pattern]
-            D2[Model Managers]
-            D3[Database Queries]
-        end
-    end
-    
-    subgraph "Database Layer"
-        E1[(PostgreSQL)]
-        E2[Core Models]
-        E3[Shipment Models]
-        E4[Encrypted Configs]
-    end
-    
-    subgraph "External APIs"
-        F1[DHL Express API]
-        F2[Future Courier APIs]
-    end
-    
-    subgraph "Background Processing"
-        G1[Celery Worker]
-        G2[Request Processor]
-        G3[Batch Processor]
-    end
-    
-    A1 --> B1
-    A2 --> B2
-    A3 --> B3
-    A4 --> B4
-    A5 --> B5
-    
-    B1 --> C1
-    B2 --> C1
-    B3 --> C1
-    B4 --> C1
-    
-    C1 --> C2
-    C2 --> C3
-    C3 --> C4
-    C4 --> F1
-    
-    B1 --> D1
-    B2 --> D1
-    B3 --> D1
-    B4 --> D1
-    
-    D1 --> E1
-    E1 --> E2
-    E1 --> E3
-    E1 --> E4
-    
-    B1 --> G1
-    G1 --> G2
-    G2 --> G3
-```
-
 ### Key Components
 
 - **API Layer**: Django REST Framework endpoints for all operations
@@ -502,69 +417,101 @@ sequenceDiagram
 
 ### Base URL
 ```
-http://localhost:8000
+http://localhost:8000/api/v1
 ```
 
 ### 1. Create Shipment Request
 
 **Endpoint:** `POST /shipment-requests/`
 
-**Request Body:**
+**cURL Example:**
+```bash
+curl --location 'http://localhost:8000/api/v1/shipment-requests/' \
+--header 'Accept: application/json' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "shipment_type_id": 2,
+    "reference_number": "REF123437",
+    "shipper": {
+        "name": "John Doe",
+        "address": "123 Main Street, Al Olaya",
+        "city": "Berlin",
+        "country": "DEU",
+        "phone": "+966501234567",
+        "email": "john.doe1@example.com",
+        "postal_code": 12235
+    },
+    "consignee": {
+        "name": "Jane Smith",
+        "address": "456 King Abdulaziz Road",
+        "city": "Bonn",
+        "country": "DEU",
+        "phone": "+966509876543",
+        "email": "jane.smith1@example.com",
+        "postal_code": 12345
+    },
+    "pickup_date": "2024-01-15",
+    "weight": 1.2,
+    "weight_unit": "kg",
+    "dimensions": {
+        "length": 50,
+        "width": 30,
+        "height": 20
+    },
+    "dimension_unit": "mm",
+    "special_instructions": "Handle with care. Fragile items included."
+}'
+```
+
+**Request Body Schema:**
 ```json
 {
-  "shipment_type": "express",
-  "reference_number": "REF-2024-001",
+  "shipment_type_id": 2,
+  "reference_number": "REF123437",
   "shipper": {
     "name": "John Doe",
-    "address": "123 Main St",
-    "city": "New York",
-    "country": "USA",
-    "phone": "+1234567890",
-    "email": "john@example.com",
-    "postal_code": "10001"
+    "address": "123 Main Street, Al Olaya",
+    "city": "Berlin",
+    "country": "DEU",
+    "phone": "+966501234567",
+    "email": "john.doe1@example.com",
+    "postal_code": 12235
   },
   "consignee": {
     "name": "Jane Smith",
-    "address": "456 Oak Ave",
-    "city": "Los Angeles",
-    "country": "USA",
-    "phone": "+1987654321",
-    "email": "jane@example.com",
-    "postal_code": "90210"
-  },
-  "route": {
-    "origin": "New York",
-    "destination": "Los Angeles"
-  },
-  "weight": {
-    "value": 2.5,
-    "unit": "kg"
-  },
-  "dimensions": {
-    "height": 30,
-    "width": 20,
-    "length": 40,
-    "unit": "cm"
+    "address": "456 King Abdulaziz Road",
+    "city": "Bonn",
+    "country": "DEU",
+    "phone": "+966509876543",
+    "email": "jane.smith1@example.com",
+    "postal_code": 12345
   },
   "pickup_date": "2024-01-15",
-  "special_instructions": "Handle with care"
+  "weight": 1.2,
+  "weight_unit": "kg",
+  "dimensions": {
+    "length": 50,
+    "width": 30,
+    "height": 20
+  },
+  "dimension_unit": "mm",
+  "special_instructions": "Handle with care. Fragile items included."
 }
 ```
 
 **Success Response (201):**
 ```json
 {
-  "success": true,
-  "message": "Shipment request created successfully",
-  "data": {
-    "request_id": 1,
-    "reference_number": "REF-2024-001",
-    "status": "processing",
-    "courier": "DHL",
-    "tracking_number": "DHL123456789",
-    "estimated_delivery": "2024-01-17T10:00:00Z",
-    "created_at": "2024-01-15T09:30:00Z"
-  }
+    "success": true,
+    "message": "Shipment request created successfully",
+    "data": {
+        "id": 1,
+        "reference_number": "REF123437",
+        "status": "pending",
+        "created_at": "2025-10-21T20:24:07.444955+00:00",
+        "shipper_id": 1,
+        "consignee_id": 1
+    }
 }
 ```
 
@@ -582,20 +529,26 @@ http://localhost:8000
 
 ### 2. Get Shipment Label
 
-**Endpoint:** `GET /shipment-labels/{reference_number}/`
+**Endpoint:** `GET /shipment-labels/{reference_number}`
+
+**cURL Example:**
+```bash
+curl --location 'http://localhost:8000/api/v1/shipment-labels/REF123437'
+```
 
 **Success Response (200):**
 ```json
 {
-  "success": true,
-  "data": {
-    "id": 1,
-    "reference_number": "REF-2024-001",
-    "url": "https://api.dhl.com/labels/DHL123456789.pdf",
-    "format": "PDF",
-    "is_active": true,
-    "created_at": "2024-01-15T09:35:00Z"
-  }
+    "success": true,
+    "message": "Label retrieved successfully",
+    "data": {
+        "id": 3,
+        "reference_number": "REF123437",
+        "url": "https://api-sandbox.dhl.com/parcel/de/shipping/v2/labels?token=x5xzrHE7ctmqPqk33k%2BKkKVOF7rDdlCe35HwWACAmA5yiaN4QeyVlJ2S%2FyRW1IQrbsqJ%2Bf%2FB4JuUWex0tKUE%2BOrgzoO6MrjST%2FOE69eW2sTHRtM0vUAgsEvI6lLukTpUO3NpawftZJ%2FeqEIwt8R1eh9E0HUyjNbAudun7tcX68jsnJ6p9%2FQD8AocXOJE0XcD",
+        "format": "PDF",
+        "is_active": true,
+        "created_at": "2025-10-21T21:16:09.008546+00:00"
+    }
 }
 ```
 
@@ -610,72 +563,78 @@ http://localhost:8000
 
 ### 3. Track Shipment
 
-**Endpoint:** `GET /shipments/{reference_number}/track/`
+**Endpoint:** `GET /api/v1/shipments/{reference_number}/track`
+
+**cURL Example:**
+```bash
+curl --location 'http://localhost:8000/api/v1/shipments/REF123437/track'
+```
 
 **Success Response (200):**
 ```json
 {
-  "success": true,
-  "service": "DHL Express",
-  "current_status": "IN_TRANSIT",
-  "status_description": "Package is in transit",
-  "current_location": {
-    "address": "DHL Sorting Facility",
-    "country": "USA",
-    "postal_code": "10001"
-  },
-  "events": [
-    {
-      "timestamp": "2024-01-15T09:30:00Z",
-      "status": "PICKED_UP",
-      "description": "Package picked up from sender",
-      "location": {
-        "address": "123 Main St",
-        "country": "USA",
-        "postal_code": "10001"
-      }
-    },
-    {
-      "timestamp": "2024-01-15T14:20:00Z",
-      "status": "IN_TRANSIT",
-      "description": "Package is in transit",
-      "location": {
-        "address": "DHL Sorting Facility",
-        "country": "USA",
-        "postal_code": "10001"
-      }
+    "success": true,
+    "message": "Tracking information retrieved successfully",
+    "data": {
+        "service": "DHL",
+        "current_status": "created",
+        "status_description": "Created",
+        "current_location": {
+            "address": "123 Main Street, Al Olaya, Berlin",
+            "country": "DEU",
+            "postal_code": "12235"
+        },
+        "events": [
+            {
+                "timestamp": "2025-10-21T20:24:13.736251+00:00",
+                "status": "created",
+                "description": "Created",
+                "location": {
+                    "address": "123 Main Street, Al Olaya, Berlin",
+                    "country": "DEU",
+                    "postal_code": "12235"
+                }
+            }
+        ],
+        "origin": {
+            "address": "123 Main Street, Al Olaya",
+            "city": "Berlin",
+            "country": "DEU",
+            "postal_code": "12235"
+        },
+        "destination": {
+            "address": "456 King Abdulaziz Road",
+            "city": "Bonn",
+            "country": "DEU",
+            "postal_code": "12345"
+        },
+        "reference_number": "REF123437",
+        "shipment_id": 5,
+        "error": null,
+        "error_code": null
     }
-  ],
-  "origin": {
-    "address": "123 Main St",
-    "city": "New York",
-    "country": "USA",
-    "postal_code": "10001"
-  },
-  "destination": {
-    "address": "456 Oak Ave",
-    "city": "Los Angeles",
-    "country": "USA",
-    "postal_code": "90210"
-  },
-  "reference_number": "REF-2024-001",
-  "shipment_id": 1
 }
 ```
 
 ### 4. Cancel Shipment
 
-**Endpoint:** `POST /shipments/{reference_number}/cancel/`
+**Endpoint:** `POST /api/v1/shipments/{reference_number}/cancel/`
+
+**cURL Example:**
+```bash
+curl --location --request POST 'http://localhost:8000/api/v1/shipments/REF123437/cancel/'
+```
 
 **Success Response (200):**
 ```json
 {
-  "success": true,
-  "message": "Shipment cancelled successfully",
-  "data": {
-    "shipment_id": 1,
-    "reference_number": "REF-2024-001"
-  }
+    "success": true,
+    "message": "Shipment cancelled successfully",
+    "data": {
+        "shipment_id": 5,
+        "reference_number": "REF123437",
+        "cancelled_at": "2025-10-21T21:18:29.243064"
+    }
 }
 ```
 
@@ -690,7 +649,23 @@ http://localhost:8000
 
 ### 5. DHL Webhook
 
-**Endpoint:** `POST /webhooks/dhl/`
+**Endpoint:** `POST /api/v1/webhooks/dhl/`
+
+**cURL Example:**
+```bash
+curl --location 'http://localhost:8000/api/v1/webhooks/dhl/' \
+--header 'X-API-Key: dhl-webhook-secret-key-2024' \
+--header 'Content-Type: application/json' \
+--data '{
+    "tracking_number": "0034043333301020017128697",
+    "status": "in_transit",
+    "location": {
+        "countryCode": "DEU",
+        "postalCode": "12345",
+        "addressLocality": "456 King Abdulaziz Road"
+    }
+}'
+```
 
 **Headers:**
 ```
@@ -701,29 +676,27 @@ Content-Type: application/json
 **Request Body:**
 ```json
 {
-  "tracking_number": "DHL123456789",
-  "status": "DELIVERED",
-  "timestamp": "2024-01-17T10:30:00Z",
-  "location": {
-    "address": "456 Oak Ave",
-    "city": "Los Angeles",
-    "country": "USA",
-    "postal_code": "90210"
-  }
+    "tracking_number": "0034043333301020017128697",
+    "status": "in_transit",
+    "location": {
+        "countryCode": "DEU",
+        "postalCode": "12345",
+        "addressLocality": "456 King Abdulaziz Road"
+    }
 }
 ```
 
 **Success Response (200):**
 ```json
 {
-  "success": true,
-  "message": "Webhook processed successfully",
-  "data": {
-    "shipment_id": 1,
-    "reference_number": "REF-2024-001",
-    "status_entry_id": 3,
-    "mapped_status": "DELIVERED"
-  }
+    "success": true,
+    "message": "Webhook processed successfully",
+    "data": {
+        "shipment_id": 4,
+        "reference_number": "REF123427",
+        "status_entry_id": 13,
+        "mapped_status": "in_transit"
+    }
 }
 ```
 
@@ -987,19 +960,3 @@ DATABASES = {
 | `DHL_WEBHOOK_API_KEY` | DHL webhook authentication key | `dhl-webhook-secret-key-2024` | Yes |
 | `SECRET_KEY` | Django secret key | `django-insecure-default` | Yes |
 | `ENCRYPTION_KEY` | Encryption key for sensitive data | `default-key` | Yes |
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
----
-
-**Need help?** Check the API documentation or create an issue in the repository.
