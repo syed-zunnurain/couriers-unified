@@ -415,11 +415,6 @@ sequenceDiagram
 
 ## 📚 API Documentation
 
-### Base URL
-```
-http://localhost:8000/api/v1
-```
-
 ### 1. Create Shipment Request
 
 **Endpoint:** `POST /shipment-requests/`
@@ -672,186 +667,37 @@ Content-Type: application/json
 
 ## 🔧 Adding a New Courier
 
-The system is designed to easily integrate new courier services. Here's a step-by-step guide:
+The system is designed to easily integrate new courier services. Here's a simple step-by-step guide:
 
-### Step 1: Database Setup
+### 1. Database Setup
+- Add courier to `Courier` table
+- Create `CourierConfig` with API credentials
+- Add supported routes and shipment types
 
-1. **Add courier to database:**
-   ```python
-   # Run Django shell: python manage.py shell
-   from core.models import Courier, CourierConfig
-   
-   # Create courier
-   courier = Courier.objects.create(
-       name="FedEx",
-       supports_cancellation=True,
-       is_active=True
-   )
-   
-   # Create configuration
-   CourierConfig.objects.create(
-       courier=courier,
-       base_url="https://api.fedex.com/v1",
-       api_key="your-api-key",
-       api_secret="your-api-secret",
-       is_active=True
-   )
-   ```
+### 2. Create HTTP Client
+- Extend `BaseHttpClient` class
+- Implement `create_shipment()`, `get_label()`, `track_shipment()` methods
 
-2. **Add supported routes and shipment types:**
-   ```python
-   from core.models import Route, ShipmentType, CourierRoute, CourierShipmentType
-   
-   # Add routes
-   route = Route.objects.create(origin="New York", destination="Los Angeles")
-   CourierRoute.objects.create(courier=courier, route=route, is_active=True)
-   
-   # Add shipment types
-   shipment_type = ShipmentType.objects.create(name="express")
-   CourierShipmentType.objects.create(courier=courier, shipment_type=shipment_type)
-   ```
+### 3. Create Courier Class
+- Extend `BaseCourier` class
+- Implement `_prepare_payload()`, `_map_response()`, `fetch_label()`, `track_shipment()` methods
 
-### Step 2: Create Courier Implementation
+### 4. Create Mapping Services
+- Build payload converter for courier API format
+- Create response mapper to unified format
+- Add status mapping if needed
 
-1. **Create HTTP Client:**
-   ```python
-   # app/shipment/services/http_clients/fedex_client.py
-   from .base_client import BaseHttpClient
-   
-   class FedExHttpClient(BaseHttpClient):
-       def __init__(self, base_url, api_key, api_secret, **kwargs):
-           super().__init__(base_url, **kwargs)
-           self.api_key = api_key
-           self.api_secret = api_secret
-       
-       def create_shipment(self, payload):
-           # Implement FedEx shipment creation
-           pass
-       
-       def get_label(self, tracking_number):
-           # Implement FedEx label fetching
-           pass
-       
-       def track_shipment(self, tracking_number):
-           # Implement FedEx tracking
-           pass
-   ```
+### 5. Register Courier
+- Add courier class to `CourierFactory.COURIER_CLASSES`
+- Update status mapping service
 
-2. **Create Courier Class:**
-   ```python
-   # app/shipment/services/couriers/fedex_courier.py
-   from .base_courier import BaseCourier
-   from ..http_clients.fedex_client import FedExHttpClient
-   
-   class FedExCourier(BaseCourier):
-       def _create_http_client(self):
-           return FedExHttpClient(
-               base_url=self.config.get('base_url'),
-               api_key=self.config.get('api_key'),
-               api_secret=self.config.get('api_secret')
-           )
-       
-       def _prepare_payload(self, request):
-           # Convert unified request to FedEx format
-           pass
-       
-       def _map_response(self, response_data):
-           # Convert FedEx response to unified format
-           pass
-       
-       def fetch_label(self, courier_external_id):
-           # Implement label fetching
-           pass
-       
-       def track_shipment(self, courier_external_id):
-           # Implement tracking
-           pass
-   ```
+### 6. Add Webhook Support (Optional)
+- Create webhook parser
+- Add webhook endpoint to URLs
 
-3. **Create Mapping Services:**
-   ```python
-   # app/shipment/services/mapping/fedex/fedex_payload_builder.py
-   def build_fedex_payload(request):
-       # Convert unified request to FedEx API format
-       pass
-   
-   # app/shipment/services/mapping/fedex/fedex_response_mapper.py
-   def map_fedex_response_to_shipment_response(response_data, success):
-       # Convert FedEx response to unified format
-       pass
-   ```
-
-### Step 3: Register Courier
-
-1. **Update Courier Factory:**
-   ```python
-   # app/shipment/services/couriers/courier_factory.py
-   from .fedex_courier import FedExCourier
-   
-   class CourierFactory:
-       COURIER_CLASSES = {
-           'dhl': DHLCourier,
-           'fedex': FedExCourier,  # Add new courier
-       }
-   ```
-
-2. **Add Status Mapping (if needed):**
-   ```python
-   # app/shipment/services/mapping/status_mapping_service.py
-   COURIER_STATUS_MAPPING = {
-       'dhl': {...},
-       'fedex': {  # Add FedEx status mapping
-           'PICKED_UP': {'status': 'PICKED_UP', 'description': 'Package picked up'},
-           'IN_TRANSIT': {'status': 'IN_TRANSIT', 'description': 'Package in transit'},
-           # ... more mappings
-       }
-   }
-   ```
-
-### Step 4: Add Webhook Support (Optional)
-
-1. **Create Webhook Parser:**
-   ```python
-   # app/shipment/services/webhooks/fedex_webhook_parser.py
-   class FedExWebhookParser:
-       @staticmethod
-       def parse(payload):
-           # Parse FedEx webhook payload
-           pass
-   ```
-
-2. **Add Webhook Endpoint:**
-   ```python
-   # app/shipment/urls.py
-   urlpatterns = [
-       # ... existing patterns
-       path('webhooks/fedex/', webhook_views.fedex_webhook, name='fedex_webhook'),
-   ]
-   ```
-
-### Step 5: Testing
-
-1. **Create test data:**
-   ```python
-   # Test the new courier integration
-   from shipment.services.couriers.courier_factory import courier_factory
-   
-   # Test shipment creation
-   courier = courier_factory.get_courier_instance('fedex')
-   # ... test implementation
-   ```
-
-2. **Run tests:**
-   ```bash
-   python manage.py test
-   ```
-
-### Step 6: Documentation
-
-Update this README with:
-- New courier in the system architecture diagram
-- API examples for the new courier
-- Any courier-specific configuration requirements
+### 7. Test Integration
+- Test shipment creation, label fetching, and tracking
+- Run test suite to ensure compatibility
 
 ## 🛠️ Development
 
