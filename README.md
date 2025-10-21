@@ -515,18 +515,6 @@ curl --location 'http://localhost:8000/api/v1/shipment-requests/' \
 }
 ```
 
-**Error Response (400):**
-```json
-{
-  "success": false,
-  "message": "Validation failed",
-  "errors": {
-    "reference_number": ["This field is required."],
-    "weight": ["Weight must be greater than 0."]
-  }
-}
-```
-
 ### 2. Get Shipment Label
 
 **Endpoint:** `GET /shipment-labels/{reference_number}`
@@ -549,15 +537,6 @@ curl --location 'http://localhost:8000/api/v1/shipment-labels/REF123437'
         "is_active": true,
         "created_at": "2025-10-21T21:16:09.008546+00:00"
     }
-}
-```
-
-**Error Response (404):**
-```json
-{
-  "success": false,
-  "error": "Shipment not found",
-  "error_code": "SHIPMENT_NOT_FOUND"
 }
 ```
 
@@ -635,15 +614,6 @@ curl --location --request POST 'http://localhost:8000/api/v1/shipments/REF123437
         "reference_number": "REF123437",
         "cancelled_at": "2025-10-21T21:18:29.243064"
     }
-}
-```
-
-**Error Response (400):**
-```json
-{
-  "success": false,
-  "message": "Shipment cannot be cancelled",
-  "error_code": "CANCELLATION_NOT_ALLOWED"
 }
 ```
 
