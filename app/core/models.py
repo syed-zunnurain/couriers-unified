@@ -4,14 +4,12 @@ from .utils.encryption import encryption_manager
 
 
 class Courier(models.Model):
-    name = models.CharField(max_length=255, unique=True, help_text="Name of the courier service")
+    name = models.CharField(max_length=255, unique=True)
     supports_cancellation = models.BooleanField(
-        default=False, 
-        help_text="Whether this courier supports order cancellation"
+        default=False
     )
     is_active = models.BooleanField(
-        default=True, 
-        help_text="Whether this courier is currently active"
+        default=True
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -27,7 +25,7 @@ class Courier(models.Model):
 
 
 class ShipmentType(models.Model):
-    name = models.CharField(max_length=100, unique=True, help_text="Name of the shipment type (e.g., normal, urgent)")
+    name = models.CharField(max_length=100, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -44,13 +42,11 @@ class ShipmentType(models.Model):
 class CourierShipmentType(models.Model):
     courier = models.ForeignKey(
         Courier, 
-        on_delete=models.CASCADE,
-        help_text="The courier service"
+        on_delete=models.CASCADE
     )
     shipment_type = models.ForeignKey(
         ShipmentType, 
-        on_delete=models.CASCADE,
-        help_text="The shipment type supported by this courier"
+        on_delete=models.CASCADE
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -67,8 +63,8 @@ class CourierShipmentType(models.Model):
 
 
 class Route(models.Model):
-    origin = models.CharField(max_length=255, help_text="Origin location of the route")
-    destination = models.CharField(max_length=255, help_text="Destination location of the route")
+    origin = models.CharField(max_length=255)
+    destination = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -85,17 +81,14 @@ class Route(models.Model):
 class CourierRoute(models.Model):
     courier = models.ForeignKey(
         Courier, 
-        on_delete=models.CASCADE,
-        help_text="The courier service"
+        on_delete=models.CASCADE
     )
     route = models.ForeignKey(
         Route, 
-        on_delete=models.CASCADE,
-        help_text="The route supported by this courier"
+        on_delete=models.CASCADE
     )
     is_active = models.BooleanField(
-        default=True, 
-        help_text="Whether this route is currently active for this courier"
+        default=True
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -114,33 +107,24 @@ class CourierRoute(models.Model):
 class CourierConfig(models.Model):
     courier = models.ForeignKey(
         Courier, 
-        on_delete=models.CASCADE,
-        help_text="The courier this configuration belongs to"
+        on_delete=models.CASCADE
     )
-    base_url = models.URLField(
-        help_text="Base URL for the courier's API"
-    )
-    _api_key = models.TextField(
-        help_text="Encrypted API key for authentication"
-    )
+    base_url = models.URLField()
+    _api_key = models.TextField()
     _api_secret = models.TextField(
         blank=True, 
-        null=True,
-        help_text="Encrypted API secret for authentication (optional)"
+        null=True
     )
     _username = models.TextField(
         blank=True, 
-        null=True,
-        help_text="Encrypted username for authentication (optional)"
+        null=True
     )
     _password = models.TextField(
         blank=True, 
-        null=True,
-        help_text="Encrypted password for authentication (optional)"
+        null=True
     )
     is_active = models.BooleanField(
-        default=True, 
-        help_text="Whether this configuration is currently active"
+        default=True
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

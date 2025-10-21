@@ -15,9 +15,9 @@ class Migration(migrations.Migration):
             name='Courier',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(help_text='Name of the courier service', max_length=255, unique=True)),
-                ('supports_cancellation', models.BooleanField(default=False, help_text='Whether this courier supports order cancellation')),
-                ('is_active', models.BooleanField(default=True, help_text='Whether this courier is currently active')),
+                ('name', models.CharField(max_length=255, unique=True)),
+                ('supports_cancellation', models.BooleanField(default=False)),
+                ('is_active', models.BooleanField(default=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
             ],

@@ -32,13 +32,6 @@ class DHLTrackingResponseParser:
     
     @staticmethod
     def _parse_events(events: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        
-        Args:
-            events: List of events from DHL API
-            
-        Returns:
-            List of parsed events
-        """
         parsed_events = []
         
         for event in events:
@@ -58,15 +51,6 @@ class DHLTrackingResponseParser:
     
     @staticmethod
     def _parse_location(location: Dict[str, Any]) -> Dict[str, str]:
-        """
-        Parse location information from DHL response.
-        
-        Args:
-            location: Location data from DHL API
-            
-        Returns:
-            Dict containing location information
-        """
         address = location.get('address', {})
         return {
             'address': address.get('addressLocality', ''),
@@ -77,15 +61,6 @@ class DHLTrackingResponseParser:
     
     @staticmethod
     def _parse_details(details: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Parse shipment details from DHL response.
-        
-        Args:
-            details: Details data from DHL API
-            
-        Returns:
-            Dict containing parsed details
-        """
         try:
             product = details.get('product', {})
             weight = details.get('weight', {})
@@ -112,9 +87,6 @@ class DHLTrackingResponseParser:
     
     @staticmethod
     def parse_error_response(error_message: str) -> Dict[str, Any]:
-        """
-        Parse DHL tracking error messages to return clean error messages and codes.
-        """
         error_code = 'COURIER_API_ERROR'
         clean_error_message = 'Failed to track shipment with courier'
 

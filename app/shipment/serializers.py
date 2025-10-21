@@ -34,21 +34,16 @@ class ShipmentRequestCreateSerializer(serializers.Serializer):
     weight = serializers.DecimalField(max_digits=10, decimal_places=2)
     weight_unit = serializers.CharField(
         max_length=10,
-        default='kg',
-        help_text="Unit of measurement for weight (e.g., kg, lb, g)"
+        default='kg'
     )
-    dimensions = serializers.DictField(
-        help_text="Dimensions in format: {length: 10, width: 5, height: 3}"
-    )
+    dimensions = serializers.DictField()
     dimension_unit = serializers.CharField(
         max_length=10,
-        default='cm',
-        help_text="Unit of measurement for dimensions (e.g., cm, in, m)"
+        default='cm'
     )
     special_instructions = serializers.CharField(
         required=False, 
-        allow_blank=True,
-        help_text="Special instructions for the shipment"
+        allow_blank=True
     )
     
     def validate(self, data):

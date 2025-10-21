@@ -78,15 +78,6 @@ class DHLHttpClient(BaseHttpClient):
             return None
     
     def create_shipment(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Create shipment with DHL API.
-        
-        Args:
-            payload: DHL-specific payload
-            
-        Returns:
-            Response data from DHL API
-        """
         try:
             endpoint = "parcel/de/shipping/v2/orders?validate=false"
             response = self._make_request('POST', endpoint, data=payload)
@@ -117,15 +108,6 @@ class DHLHttpClient(BaseHttpClient):
             }
     
     def track_shipment(self, tracking_number: str) -> Dict[str, Any]:
-        """
-        Track shipment with DHL API using test environment.
-        
-        Args:
-            tracking_number: The tracking number to look up (ignored, using hardcoded test number)
-            
-        Returns:
-            Tracking data from DHL API
-        """
         try:
             endpoint = "track/shipments"
             test_tracking_number = ""
@@ -178,15 +160,6 @@ class DHLHttpClient(BaseHttpClient):
             }
     
     def cancel_shipment(self, courier_external_id: str) -> Dict[str, Any]:
-        """
-        Cancel shipment with DHL API.
-        
-        Args:
-            courier_external_id: The DHL shipment ID
-            
-        Returns:
-            Dict containing cancellation result
-        """
         try:
             # Cancel shipment endpoint
             endpoint = f"parcel/de/shipping/v2/orders?shipment={courier_external_id}&profile=STANDARD_GRUPPENPROFIL"
@@ -221,15 +194,6 @@ class DHLHttpClient(BaseHttpClient):
             }
     
     def get_label(self, courier_external_id: str) -> Dict[str, Any]:
-        """
-        Get shipment label from DHL API.
-        
-        Args:
-            courier_external_id: The courier external ID
-            
-        Returns:
-            Response data from DHL API
-        """
         try:
             endpoint = "parcel/de/shipping/v2/orders"
             params = {

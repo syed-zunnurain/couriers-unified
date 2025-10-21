@@ -11,17 +11,14 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
             '--force',
-            action='store_true',
-            help='Force re-seeding even if data exists',
+            action='store_true'
         )
         parser.add_argument(
             '--skip-migrations',
-            action='store_true',
-            help='Skip running migrations (assumes they are already run)',
+            action='store_true'
         )
 
     def check_tables_exist(self):
-        """Check if required tables exist in the database."""
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT table_name 
@@ -33,7 +30,6 @@ class Command(BaseCommand):
             return 'couriers' in existing_tables and 'courier_configs' in existing_tables
     
     def check_data_exists(self):
-        """Check if courier data already exists in the database."""
         try:
             from core.models import Courier
             return Courier.objects.exists()

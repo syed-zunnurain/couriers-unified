@@ -4,60 +4,44 @@ from django.db import models
 class Shipment(models.Model):
     courier = models.ForeignKey(
         'core.Courier',
-        on_delete=models.CASCADE,
-        help_text="The courier service handling this shipment"
+        on_delete=models.CASCADE
     )
     shipment_type = models.ForeignKey(
         'core.ShipmentType',
-        on_delete=models.CASCADE,
-        help_text="The type of shipment"
+        on_delete=models.CASCADE
     )
     courier_external_id = models.CharField(
         max_length=255,
-        unique=True,
-        help_text="External ID provided by the courier service"
+        unique=True
     )
     reference_number = models.CharField(
         max_length=255,
-        unique=True,
-        help_text="Reference number for this shipment"
+        unique=True
     )
     shipper = models.ForeignKey(
         'Shipper',
-        on_delete=models.CASCADE,
-        help_text="The shipper (sender) of this shipment"
+        on_delete=models.CASCADE
     )
     route = models.ForeignKey(
         'core.Route',
-        on_delete=models.CASCADE,
-        help_text="The route of this shipment"
+        on_delete=models.CASCADE
     )
     consignee = models.ForeignKey(
         'Consignee',
-        on_delete=models.CASCADE,
-        help_text="The consignee (receiver) of this shipment"
+        on_delete=models.CASCADE
     )
-    height = models.PositiveIntegerField(
-        help_text="Height of the shipment"
-    )
-    width = models.PositiveIntegerField(
-        help_text="Width of the shipment"
-    )
-    length = models.PositiveIntegerField(
-        help_text="Length of the shipment"
-    )
+    height = models.PositiveIntegerField()
+    width = models.PositiveIntegerField()
+    length = models.PositiveIntegerField()
     dimension_unit = models.CharField(
-        max_length=10,
-        help_text="Unit of measurement for dimensions (e.g., cm, in)"
+        max_length=10
     )
     weight = models.DecimalField(
         max_digits=10,
-        decimal_places=2,
-        help_text="Weight of the shipment"
+        decimal_places=2
     )
     weight_unit = models.CharField(
-        max_length=10,
-        help_text="Unit of measurement for weight (e.g., kg, lb)"
+        max_length=10
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -73,13 +57,13 @@ class Shipment(models.Model):
 
 
 class Shipper(models.Model):
-    name = models.CharField(max_length=255, help_text="Name of the shipper")
-    address = models.TextField(help_text="Address of the shipper")
-    postal_code = models.CharField(max_length=25, help_text="Postal code of the shipper")
-    city = models.CharField(max_length=100, help_text="City of the shipper")
-    country = models.CharField(max_length=100, help_text="Country of the shipper")
-    phone = models.CharField(max_length=20, help_text="Phone number of the shipper")
-    email = models.EmailField(help_text="Email address of the shipper")
+    name = models.CharField(max_length=255)
+    address = models.TextField()
+    postal_code = models.CharField(max_length=25)
+    city = models.CharField(max_length=100)
+    country = models.CharField(max_length=100)
+    phone = models.CharField(max_length=20)
+    email = models.EmailField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -94,13 +78,13 @@ class Shipper(models.Model):
 
 
 class Consignee(models.Model):
-    name = models.CharField(max_length=255, help_text="Name of the consignee")
-    address = models.TextField(help_text="Address of the consignee")
-    city = models.CharField(max_length=100, help_text="City of the consignee")
-    postal_code = models.CharField(max_length=25, help_text="Postal code of the consignee")
-    country = models.CharField(max_length=100, help_text="Country of the consignee")
-    phone = models.CharField(max_length=20, help_text="Phone number of the consignee")
-    email = models.EmailField(help_text="Email address of the consignee")
+    name = models.CharField(max_length=255)
+    address = models.TextField()
+    city = models.CharField(max_length=100)
+    postal_code = models.CharField(max_length=25)
+    country = models.CharField(max_length=100)
+    phone = models.CharField(max_length=20)
+    email = models.EmailField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -123,23 +107,20 @@ class ShipmentRequest(models.Model):
         ('cancelled', 'Cancelled'),
     ]
     
-    request_body = models.JSONField(help_text="JSON data of the shipment request")
-    reference_number = models.CharField(help_text="Reference number of the shipment request", max_length=255)
+    request_body = models.JSONField()
+    reference_number = models.CharField(max_length=255)
     status = models.CharField(
         max_length=20, 
         choices=STATUS_CHOICES, 
-        default='pending',
-        help_text="Current status of the shipment request"
+        default='pending'
     )
-    failed_reason = models.TextField(blank=True, help_text='Reason for failure', null=True)
+    failed_reason = models.TextField(blank=True, null=True)
     retries = models.PositiveIntegerField(
-        default=0, 
-        help_text="Number of retry attempts made"
+        default=0
     )
     last_retried_at = models.DateTimeField(
         null=True, 
-        blank=True, 
-        help_text="Timestamp of the last retry attempt"
+        blank=True
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -157,24 +138,19 @@ class ShipmentRequest(models.Model):
 class ShipmentLabel(models.Model):
     shipment = models.ForeignKey(
         'Shipment',
-        on_delete=models.CASCADE,
-        help_text="The shipment this label belongs to"
+        on_delete=models.CASCADE
     )
     reference_number = models.CharField(
-        max_length=255,
-        help_text="Reference number for this label"
+        max_length=255
     )
     url = models.URLField(
-        max_length=500,
-        help_text="URL to download the label"
+        max_length=500
     )
     format = models.CharField(
-        max_length=50,
-        help_text="Format of the label (e.g., PDF, PNG, ZPL)"
+        max_length=50
     )
     is_active = models.BooleanField(
-        default=True,
-        help_text="Whether this label is currently active"
+        default=True
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -197,30 +173,25 @@ class ShipmentLabel(models.Model):
 class ShipmentStatus(models.Model):
     shipment = models.ForeignKey(
         'Shipment',
-        on_delete=models.CASCADE,
-        help_text="The shipment this status update belongs to"
+        on_delete=models.CASCADE
     )
     status = models.CharField(
-        max_length=100,
-        help_text="Current status of the shipment (e.g., in_transit, delivered, exception)"
+        max_length=100
     )
     address = models.CharField(
         max_length=500,
         blank=True,
-        null=True,
-        help_text="Address where the status update occurred"
+        null=True
     )
     postal_code = models.CharField(
         max_length=20,
         blank=True,
-        null=True,
-        help_text="Postal code of the location"
+        null=True
     )
     country = models.CharField(
         max_length=100,
         blank=True,
-        null=True,
-        help_text="Country where the status update occurred"
+        null=True
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

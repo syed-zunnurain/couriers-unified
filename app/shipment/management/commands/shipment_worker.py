@@ -12,8 +12,7 @@ class Command(BaseCommand):
         parser.add_argument(
             '--batch-size',
             type=int,
-            default=10,
-            help='Number of requests to process in one batch (default: 10)'
+            default=10
         )
 
     def handle(self, *args, **options):
