@@ -115,11 +115,11 @@ graph TB
 graph TB
     subgraph "Django Application"
         subgraph "API Endpoints"
-            A1[POST /shipment-requests/]
-            A2[GET /shipment-labels/{ref}/]
-            A3[GET /shipments/{ref}/track/]
-            A4[POST /shipments/{ref}/cancel/]
-            A5[POST /webhooks/dhl/]
+            A1["POST /shipment-requests/"]
+            A2["GET /shipment-labels/"]
+            A3["GET /shipments/track/"]
+            A4["POST /shipments/cancel/"]
+            A5["POST /webhooks/dhl/"]
         end
         
         subgraph "Service Layer"
