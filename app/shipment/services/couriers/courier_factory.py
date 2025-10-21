@@ -10,8 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 class CourierFactory:
-    """Factory class to create and manage courier instances."""
-    
     COURIER_CLASSES = {
         'dhl': DHLCourier,
     }
@@ -20,7 +18,6 @@ class CourierFactory:
         self._couriers: Dict[str, CourierInterface] = {}
     
     def get_courier_instance(self, courier_name: str, courier_obj=None) -> Optional[CourierInterface]:
-        """Get courier instance with configuration from database."""
         courier_name = courier_name.lower()
         logger.info(f"CourierFactory: Getting courier instance for '{courier_name}'")
         
@@ -58,7 +55,6 @@ class CourierFactory:
         return courier_instance
     
     def create_shipment(self, courier_name: str, request: CourierRequest, courier_obj=None, shipment_type_id: int = None) -> CourierResponse:
-        """Create shipment with specified courier."""
         logger.info(f"CourierFactory: Creating shipment with courier '{courier_name}'")
         try:
             logger.info(f"CourierFactory: Getting courier instance for '{courier_name}'")
@@ -81,7 +77,6 @@ class CourierFactory:
             )
     
     def fetch_label(self, courier_name: str, courier_external_id: str) -> Dict[str, Any]:
-        """Fetch label with specified courier."""
         logger.info(f"CourierFactory: Fetching label with courier '{courier_name}'")
         try:
             logger.info(f"CourierFactory: Getting courier instance for '{courier_name}'")
@@ -106,7 +101,6 @@ class CourierFactory:
             }
     
     def track_shipment(self, courier_name: str, courier_external_id: str) -> TrackingResponse:
-        """Track shipment with specified courier."""
         logger.info(f"CourierFactory: Tracking shipment with courier '{courier_name}'")
         try:
             logger.info(f"CourierFactory: Getting courier instance for '{courier_name}'")
@@ -129,7 +123,6 @@ class CourierFactory:
             )
     
     def get_available_couriers(self) -> list:
-        """Get list of available courier names from database."""
         return [config.courier.name for config in repositories.courier_config.get_active_configs()]
 
 

@@ -7,8 +7,6 @@ logger = logging.getLogger(__name__)
 
 
 class DHLHttpClient(BaseHttpClient):
-    """HTTP client for DHL API integration with OAuth token authentication."""
-    
     def __init__(self, base_url: str, api_key: str = None, api_secret: str = None, 
                  username: str = None, password: str = None, timeout: int = 30):
         super().__init__(base_url, timeout)
@@ -20,7 +18,6 @@ class DHLHttpClient(BaseHttpClient):
         self._token_expires_at = None
     
     def _get_headers(self) -> Dict[str, str]:
-        """Get DHL-specific headers with OAuth token."""
         headers = super()._get_headers()
         
         token = self._get_valid_token()
@@ -30,7 +27,6 @@ class DHLHttpClient(BaseHttpClient):
         return headers
     
     def _get_valid_token(self) -> Optional[str]:
-        """Get a valid access token, fetching a new one if needed."""
         import time
         
         if self._access_token and self._token_expires_at and time.time() < self._token_expires_at:
@@ -39,7 +35,6 @@ class DHLHttpClient(BaseHttpClient):
         return self._fetch_access_token()
     
     def _fetch_access_token(self) -> Optional[str]:
-        """Fetch access token from DHL OAuth endpoint."""
         try:
             token_url = f"{self.base_url}/parcel/de/account/auth/ropc/v1/token"
             

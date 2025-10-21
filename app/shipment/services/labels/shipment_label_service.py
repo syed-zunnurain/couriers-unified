@@ -1,5 +1,3 @@
-"""Simple service for orchestrating shipment label operations."""
-
 import logging
 from typing import Dict, Any
 from .label_cache_service import LabelCacheService
@@ -10,8 +8,6 @@ logger = logging.getLogger(__name__)
 
 
 class ShipmentLabelService:
-    """Simple service for orchestrating shipment label operations."""
-    
     def __init__(self, 
                  courier_factory_instance=None,
                  cache_service: LabelCacheService = None,
@@ -21,15 +17,6 @@ class ShipmentLabelService:
         self._lookup_service = lookup_service or ShipmentLookupService()
     
     def get_shipment_label_by_reference(self, reference_number: str) -> LabelResponse:
-        """
-        Get shipment label by reference number.
-        
-        Args:
-            reference_number: The shipment reference number
-            
-        Returns:
-            LabelResponse containing label information or error
-        """
         try:
             logger.info(f"ShipmentLabelService: Getting label for reference {reference_number}")
             

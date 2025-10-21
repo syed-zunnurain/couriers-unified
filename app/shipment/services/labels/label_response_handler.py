@@ -1,5 +1,3 @@
-"""Response handler for shipment label operations."""
-
 from rest_framework import status
 from rest_framework.response import Response
 from typing import Dict, Any
@@ -7,19 +5,8 @@ from ...schemas.label_response import LabelResponse
 
 
 class LabelResponseHandler:
-    """Handles HTTP responses for label operations."""
-    
     @staticmethod
     def success_response(label_data: Dict[str, Any]) -> Response:
-        """
-        Create success response for label retrieval.
-        
-        Args:
-            label_data: The label data to return
-            
-        Returns:
-            DRF Response with success data
-        """
         return Response(
             {
                 'success': True,
@@ -31,15 +18,6 @@ class LabelResponseHandler:
     
     @staticmethod
     def error_response(result: Dict[str, Any]) -> Response:
-        """
-        Create error response based on error code.
-        
-        Args:
-            result: The result dict containing error information
-            
-        Returns:
-            DRF Response with appropriate error status
-        """
         error_code = result.get('error_code', 'UNKNOWN_ERROR')
         error_message = result.get('error', 'Unknown error occurred')
         

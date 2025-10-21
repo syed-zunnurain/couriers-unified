@@ -1,5 +1,3 @@
-"""Service for processing individual shipment requests."""
-
 import logging
 from django.utils import timezone
 from django.db import transaction
@@ -13,8 +11,6 @@ logger = logging.getLogger(__name__)
 
 
 class RequestProcessor:
-    """Handles processing of individual shipment requests following SRP."""
-    
     def __init__(self, 
                  courier_processor: CourierProcessor = None,
                  status_manager: RequestStatusManager = None,
@@ -24,7 +20,6 @@ class RequestProcessor:
         self.data_converter = data_converter or RequestDataConverter()
     
     def process_single_request(self, request) -> Dict[str, Any]:
-        """Process a single shipment request."""
         logger.info(f"RequestProcessor: Starting to process single request ID={request.id}")
         
         with transaction.atomic():

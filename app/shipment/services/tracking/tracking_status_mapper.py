@@ -1,5 +1,3 @@
-"""Service for mapping courier tracking statuses to standardized statuses."""
-
 import logging
 from typing import Dict, Any, List, Optional
 
@@ -7,8 +5,6 @@ logger = logging.getLogger(__name__)
 
 
 class TrackingStatusMapper:
-    """Maps courier-specific tracking statuses to standardized statuses."""
-    
     STANDARD_STATUSES = {
         'CREATED': 'Shipment created',
         'PICKED_UP': 'Package picked up',
@@ -35,16 +31,6 @@ class TrackingStatusMapper:
     
     @classmethod
     def map_courier_status(cls, courier_name: str, courier_status: str) -> Dict[str, str]:
-        """
-        Map courier-specific status to standardized status.
-        
-        Args:
-            courier_name: Name of the courier (e.g., 'dhl')
-            courier_status: Status from courier API
-            
-        Returns:
-            Dict containing standardized status and description
-        """
         try:
             courier_name_lower = courier_name.lower()
             

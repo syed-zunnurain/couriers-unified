@@ -9,8 +9,6 @@ logger = logging.getLogger(__name__)
 
 
 class BaseCourier(ABC):
-    """Base courier interface following SOLID principles."""
-    
     def __init__(self, courier_name: str, config: Dict[str, Any], courier_obj=None):
         self.courier_name = courier_name
         self.config = config
@@ -19,56 +17,25 @@ class BaseCourier(ABC):
     
     @abstractmethod
     def _create_http_client(self):
-        """Create the appropriate HTTP client for this courier."""
         pass
     
     @abstractmethod
     def _prepare_payload(self, request: ShipmentRequest) -> Dict[str, Any]:
-        """Prepare courier-specific payload from standardized request."""
         pass
     
     @abstractmethod
     def _map_response(self, response_data: Dict[str, Any]) -> ShipmentResponse:
-        """Map courier response to standardized ShipmentResponse."""
         pass
     
     @abstractmethod
     def fetch_label(self, courier_external_id: str) -> Dict[str, Any]:
-        """
-        Fetch label from courier API.
-        
-        Args:
-            courier_external_id: The courier external ID
-            
-        Returns:
-            Dict containing label data or error
-        """
         pass
     
     @abstractmethod
     def track_shipment(self, courier_external_id: str) -> TrackingResponse:
-        """
-        Track shipment with courier API.
-        
-        Args:
-            courier_external_id: The courier external ID
-            
-        Returns:
-            TrackingResponse containing tracking data or error
-        """
         pass
     
     def create_shipment(self, request: ShipmentRequest, shipment_type_id: int = None) -> ShipmentResponse:
-        """
-        Create shipment with the courier.
-        
-        Args:
-            request: Standardized shipment request
-            shipment_type_id: The shipment type ID
-            
-        Returns:
-            Standardized shipment response
-        """
         try:
             logger.info(f"{self.courier_name}: Starting shipment creation")
             logger.info(f"{self.courier_name}: Request details - Reference: {request.reference_number}, Weight: {request.weight.value} {request.weight.unit}, Dimensions: {request.dimensions.height}x{request.dimensions.width}x{request.dimensions.length} {request.dimensions.unit}, Shipper: {request.shipper.city}, Consignee: {request.consignee.city}")
@@ -94,7 +61,6 @@ class BaseCourier(ABC):
             )
     
     def _persist_shipment(self, request: ShipmentRequest, response: ShipmentResponse, shipment_type_id: int):
-        """Persist shipment to database."""
         try:
             from ..shipments.shipment_creation_service import ShipmentCreationService
             shipment = ShipmentCreationService.create_shipment(

@@ -4,8 +4,6 @@ from .utils.encryption import encryption_manager
 
 
 class Courier(models.Model):
-    """Model representing a courier service provider."""
-    
     name = models.CharField(max_length=255, unique=True, help_text="Name of the courier service")
     supports_cancellation = models.BooleanField(
         default=False, 
@@ -29,8 +27,6 @@ class Courier(models.Model):
 
 
 class ShipmentType(models.Model):
-    """Model representing different types of shipments."""
-    
     name = models.CharField(max_length=100, unique=True, help_text="Name of the shipment type (e.g., normal, urgent)")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -46,8 +42,6 @@ class ShipmentType(models.Model):
 
 
 class CourierShipmentType(models.Model):
-    """Model representing the many-to-many relationship between couriers and shipment types."""
-    
     courier = models.ForeignKey(
         Courier, 
         on_delete=models.CASCADE,
@@ -73,8 +67,6 @@ class CourierShipmentType(models.Model):
 
 
 class Route(models.Model):
-    """Model representing shipping routes between origin and destination."""
-    
     origin = models.CharField(max_length=255, help_text="Origin location of the route")
     destination = models.CharField(max_length=255, help_text="Destination location of the route")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -91,8 +83,6 @@ class Route(models.Model):
 
 
 class CourierRoute(models.Model):
-    """Model representing the many-to-many relationship between couriers and routes."""
-    
     courier = models.ForeignKey(
         Courier, 
         on_delete=models.CASCADE,
@@ -122,8 +112,6 @@ class CourierRoute(models.Model):
 
 
 class CourierConfig(models.Model):
-    """Model representing courier configuration settings."""
-    
     courier = models.ForeignKey(
         Courier, 
         on_delete=models.CASCADE,
@@ -132,7 +120,6 @@ class CourierConfig(models.Model):
     base_url = models.URLField(
         help_text="Base URL for the courier's API"
     )
-    # Encrypted fields - stored as encrypted text
     _api_key = models.TextField(
         help_text="Encrypted API key for authentication"
     )
@@ -163,48 +150,39 @@ class CourierConfig(models.Model):
         ordering = ['courier__name']
         verbose_name = 'Courier Configuration'
         verbose_name_plural = 'Courier Configurations'
-        unique_together = ['courier']  # One config per courier
+        unique_together = ['courier']
     
     def __str__(self):
         return f"{self.courier.name} Configuration"
     
-    # Property methods for encrypted fields
     @property
     def api_key(self):
-        """Get decrypted API key."""
         return encryption_manager.decrypt(self._api_key) if self._api_key else ""
     
     @api_key.setter
     def api_key(self, value):
-        """Set encrypted API key."""
         self._api_key = encryption_manager.encrypt(value) if value else ""
     
     @property
     def api_secret(self):
-        """Get decrypted API secret."""
         return encryption_manager.decrypt(self._api_secret) if self._api_secret else ""
     
     @api_secret.setter
     def api_secret(self, value):
-        """Set encrypted API secret."""
         self._api_secret = encryption_manager.encrypt(value) if value else ""
     
     @property
     def username(self):
-        """Get decrypted username."""
         return encryption_manager.decrypt(self._username) if self._username else ""
     
     @username.setter
     def username(self, value):
-        """Set encrypted username."""
         self._username = encryption_manager.encrypt(value) if value else ""
     
     @property
     def password(self):
-        """Get decrypted password."""
         return encryption_manager.decrypt(self._password) if self._password else ""
     
     @password.setter
     def password(self, value):
-        """Set encrypted password."""
         self._password = encryption_manager.encrypt(value) if value else ""

@@ -1,5 +1,3 @@
-"""Service for label caching operations."""
-
 import logging
 from typing import Dict, Any, Optional
 from ...repositories.repository_factory import repositories
@@ -9,21 +7,10 @@ logger = logging.getLogger(__name__)
 
 
 class LabelCacheService:
-    """Service for label caching operations."""
-    
     def __init__(self):
         self._shipment_label_repo = repositories.shipment_label
     
     def get_cached_label(self, reference_number: str) -> Optional[LabelResponse]:
-        """
-        Get active label by reference number.
-        
-        Args:
-            reference_number: The shipment reference number
-            
-        Returns:
-            LabelResponse if found and active, None otherwise
-        """
         try:
             existing_label = self._shipment_label_repo.get_active_by_reference_number(reference_number)
             if existing_label:
@@ -45,18 +32,6 @@ class LabelCacheService:
     
     def save_label(self, shipment_id: int, reference_number: str, 
                    url: str, format: str) -> Optional[LabelResponse]:
-        """
-        Save label to cache.
-        
-        Args:
-            shipment_id: The shipment ID
-            reference_number: The reference number
-            url: The label URL
-            format: The label format
-            
-        Returns:
-            LabelResponse with saved label data or None
-        """
         try:
             self._shipment_label_repo.deactivate_labels_by_shipment(shipment_id)
             

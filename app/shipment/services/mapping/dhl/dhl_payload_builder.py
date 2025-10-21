@@ -1,5 +1,3 @@
-"""DHL-specific payload building service."""
-
 import logging
 from typing import Dict, Any
 from ....schemas.shipment_request import ShipmentRequest
@@ -8,18 +6,15 @@ logger = logging.getLogger(__name__)
 
 
 class DHLPayloadBuilder:
-    """Builds DHL-specific payloads from standardized shipment requests."""
-    
     @classmethod
     def build_dhl_payload(cls, request: ShipmentRequest) -> Dict[str, Any]:
-        """Build DHL-specific payload from standardized request."""
         from .dhl_product_mapper import DHLProductMapper
         
         return {
             "shipments": [{
                 "product": DHLProductMapper.map_shipment_type_to_dhl_product(request.shipment_type),
                 "refNo": request.reference_number,
-                "billingNumber": "33333333330102",  # This should come from config
+                "billingNumber": "33333333330102",
                 "shipper": {
                     "name1": request.shipper.name,
                     "addressStreet": request.shipper.address,

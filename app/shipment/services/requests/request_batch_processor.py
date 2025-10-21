@@ -1,5 +1,3 @@
-"""Service for processing batches of shipment requests."""
-
 import logging
 from typing import List, Dict, Any
 from ...repositories.repository_factory import repositories
@@ -8,8 +6,6 @@ logger = logging.getLogger(__name__)
 
 
 class RequestBatchProcessor:
-    """Handles batch processing of shipment requests following SRP."""
-    
     def __init__(self, request_processor=None):
         self._request_processor = request_processor
     
@@ -21,7 +17,6 @@ class RequestBatchProcessor:
         return self._request_processor
     
     def process_requests(self, batch_size: int = 10) -> Dict[str, Any]:
-        """Process a batch of shipment requests."""
         logger.info(f"RequestBatchProcessor: Starting to process requests with batch_size={batch_size}")
         requests_to_process = self.get_requests_to_process(batch_size)
         logger.info(f"RequestBatchProcessor: Found {len(requests_to_process)} requests to process")

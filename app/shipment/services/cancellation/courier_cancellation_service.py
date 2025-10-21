@@ -9,25 +9,13 @@ logger = logging.getLogger(__name__)
 
 
 class CourierCancellationService:
-    """Service for handling courier-specific cancellation operations."""
-
     def __init__(self, courier_factory_instance=None):
         self._courier_factory = courier_factory_instance or courier_factory
 
     def cancel_with_courier(self, shipment: Shipment) -> CancellationResponse:
-        """
-        Cancel shipment with the specific courier.
-        
-        Args:
-            shipment: The shipment to cancel
-            
-        Returns:
-            CancellationResponse with the result of the courier cancellation
-        """
         try:
             logger.info(f"CourierCancellationService: Cancelling shipment {shipment.reference_number} with {shipment.courier.name}")
             
-            # Get courier instance
             courier_instance = self._courier_factory.get_courier_instance(
                 shipment.courier.name.lower(),
                 shipment.courier
@@ -40,7 +28,6 @@ class CourierCancellationService:
                     'COURIER_NOT_FOUND'
                 )
             
-            # Verify courier supports cancellation
             if not isinstance(courier_instance, CancellableCourierInterface):
                 logger.warning(f"CourierCancellationService: Courier {shipment.courier.name} does not implement CancellableCourierInterface")
                 return CancellationResponse.create_error_response(

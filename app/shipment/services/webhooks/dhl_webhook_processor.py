@@ -1,5 +1,3 @@
-"""DHL webhook processor following Single Responsibility Principle."""
-
 import logging
 from typing import Dict, Any, Optional
 from django.db import transaction
@@ -12,38 +10,20 @@ logger = logging.getLogger(__name__)
 
 
 class DHLWebhookProcessor:
-    """
-    Single Responsibility: Process validated DHL webhook data and update shipment status.
-    
-    This class only handles the business logic of processing webhook data.
-    It doesn't parse, validate, or handle HTTP requests - just processes data.
-    """
-    
     def __init__(self):
         self._shipment_lookup_service = None
     
     @property
     def shipment_lookup_service(self):
-        """Lazy load shipment lookup service."""
         if not self._shipment_lookup_service:
             from ...services.shipments.shipment_lookup_service import ShipmentLookupService
             self._shipment_lookup_service = ShipmentLookupService()
         return self._shipment_lookup_service
     
     def process_webhook(self, webhook_data: DHLWebhookData) -> Dict[str, Any]:
-        """
-        Process DHL webhook data and update shipment status.
-        
-        Args:
-            webhook_data: Parsed and validated webhook data
-            
-        Returns:
-            Dict containing processing result
-        """
         try:
             logger.info(f"DHLWebhookProcessor: Processing webhook for tracking number {webhook_data.tracking_number}")
             
-            # Find shipment by courier external ID
             shipment = self._find_shipment_by_tracking_number(webhook_data.tracking_number)
             if not shipment:
                 logger.warning(f"DHLWebhookProcessor: Shipment not found for tracking number {webhook_data.tracking_number}")

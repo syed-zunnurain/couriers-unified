@@ -1,5 +1,3 @@
-"""DHL label response parser for handling label-specific responses."""
-
 import json
 import logging
 from typing import Dict, Any, Optional
@@ -8,19 +6,8 @@ logger = logging.getLogger(__name__)
 
 
 class DHLLabelResponseParser:
-    """Parser for DHL label API responses."""
-    
     @staticmethod
     def parse_success_response(response_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """
-        Parse successful DHL label response.
-        
-        Args:
-            response_data: The response data from DHL API
-            
-        Returns:
-            Dict containing label data or None if parsing fails
-        """
         try:
             if 'items' in response_data and response_data['items']:
                 items = response_data['items']
@@ -41,15 +28,6 @@ class DHLLabelResponseParser:
     
     @staticmethod
     def parse_error_response(error_message: str) -> Dict[str, Any]:
-        """
-        Parse DHL error response and return clean error message.
-        
-        Args:
-            error_message: The error message from DHL API
-            
-        Returns:
-            Dict containing error_code and clean error_message
-        """
         try:
             error_code = 'COURIER_API_ERROR'
             clean_message = 'Failed to fetch label from DHL'
@@ -83,15 +61,6 @@ class DHLLabelResponseParser:
     
     @staticmethod
     def _parse_400_error(error_message: str) -> Dict[str, Any]:
-        """
-        Parse HTTP 400 error response from DHL.
-        
-        Args:
-            error_message: The error message containing JSON
-            
-        Returns:
-            Dict containing error_code and clean error_message
-        """
         try:
             json_start = error_message.find('{')
             if json_start == -1:

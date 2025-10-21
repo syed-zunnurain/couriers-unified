@@ -4,9 +4,6 @@ from typing import Dict, Any, List
 logger = logging.getLogger(__name__)
 
 class StatusMappingService:
-    """Service for mapping courier-specific statuses to standardized statuses."""
-    
-    # Standardized status mappings
     STANDARD_STATUSES = {
         'created': 'created',
         'picked_up': 'picked_up',
@@ -21,7 +18,6 @@ class StatusMappingService:
         'failed': 'failed'
     }
     
-    # DHL-specific status mappings
     DHL_STATUS_MAPPING = {
         'OK': 'delivered',
         'SUCCESS': 'delivered',
@@ -38,7 +34,6 @@ class StatusMappingService:
         'PICKED_UP': 'picked_up'
     }
     
-    # FedEx-specific status mappings (for future use)
     FEDEX_STATUS_MAPPING = {
         'PICKED_UP': 'picked_up',
         'IN_TRANSIT': 'in_transit',

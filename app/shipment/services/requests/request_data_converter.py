@@ -1,5 +1,3 @@
-"""Service for converting request data to courier format."""
-
 import logging
 from typing import Dict, Any
 from ..couriers.courier_interface import CourierRequest, Weight, Dimensions
@@ -9,10 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 class RequestDataConverter:
-    """Handles conversion of request data to courier format following SRP."""
-    
     def convert_to_courier_request(self, request_data: Dict[str, Any], reference_number: str, shipper, consignee) -> CourierRequest:
-        """Convert request data to CourierRequest format."""
         logger.info(f"RequestDataConverter: Converting request data to CourierRequest format")
         
         route, created = repositories.route.get_or_create_by_cities(

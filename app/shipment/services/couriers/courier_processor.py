@@ -1,5 +1,3 @@
-"""Service for processing shipments with couriers."""
-
 import logging
 from typing import Dict, Any
 from .find_available_courier import FindAvailableCourier
@@ -8,13 +6,10 @@ logger = logging.getLogger(__name__)
 
 
 class CourierProcessor:
-    """Handles courier-specific processing following SRP."""
-    
     def __init__(self, find_available_courier: FindAvailableCourier = None):
         self.find_available_courier = find_available_courier or FindAvailableCourier()
     
     def process_with_courier(self, request_data: Dict[str, Any], reference_number: str, shipper, consignee) -> Dict[str, Any]:
-        """Process the shipment with the assigned courier."""
         logger.info(f"CourierProcessor: Looking for available courier")
         
         courier = self.find_available_courier.find(
@@ -35,7 +30,6 @@ class CourierProcessor:
         return self._create_shipment_with_courier(request_data, reference_number, courier, shipper, consignee)
     
     def _create_shipment_with_courier(self, request_data: Dict[str, Any], reference_number: str, courier, shipper, consignee) -> Dict[str, Any]:
-        """Create shipment with specific courier."""
         logger.info(f"CourierProcessor: Starting courier processing with courier '{courier.name}'")
         
         try:

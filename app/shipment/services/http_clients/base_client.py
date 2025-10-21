@@ -9,15 +9,12 @@ logger = logging.getLogger(__name__)
 
 
 class BaseHttpClient(ABC):
-    """Base HTTP client for all courier integrations."""
-    
     def __init__(self, base_url: str, timeout: int = 30):
         self.base_url = base_url.rstrip('/')
         self.timeout = timeout
         self.session = self._create_session()
     
     def _create_session(self) -> requests.Session:
-        """Create a configured requests session with retry strategy."""
         session = requests.Session()
         
         retry_strategy = Retry(
@@ -33,7 +30,6 @@ class BaseHttpClient(ABC):
         return session
     
     def _get_headers(self) -> Dict[str, str]:
-        """Get default headers for requests."""
         return {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
@@ -46,21 +42,6 @@ class BaseHttpClient(ABC):
         data: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None
     ) -> requests.Response:
-        """
-        Make HTTP request with error handling.
-        
-        Args:
-            method: HTTP method (GET, POST, etc.)
-            endpoint: API endpoint
-            data: Request data
-            headers: Additional headers
-            
-        Returns:
-            Response object
-            
-        Raises:
-            requests.RequestException: If request fails
-        """
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
         request_headers = {**self._get_headers(), **(headers or {})}
         
@@ -84,17 +65,6 @@ class BaseHttpClient(ABC):
     
     def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None, 
             headers: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
-        """
-        Make GET request with error handling.
-        
-        Args:
-            endpoint: API endpoint
-            params: Query parameters
-            headers: Additional headers
-            
-        Returns:
-            Dict containing response data or error
-        """
         try:
             url = f"{self.base_url}/{endpoint.lstrip('/')}"
             request_headers = {**self._get_headers(), **(headers or {})}
@@ -135,10 +105,8 @@ class BaseHttpClient(ABC):
     
     @abstractmethod
     def create_shipment(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-        """Create shipment with the courier."""
         pass
     
     @abstractmethod
     def track_shipment(self, tracking_number: str) -> Dict[str, Any]:
-        """Track shipment with the courier."""
         pass

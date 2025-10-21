@@ -12,8 +12,6 @@ logger = logging.getLogger(__name__)
 
 
 class ShipmentCreationService:
-    """Service responsible for creating shipments in the database."""
-    
     @staticmethod
     def create_shipment(
         request: ShipmentRequest,
@@ -21,21 +19,6 @@ class ShipmentCreationService:
         courier: Courier,
         shipment_type_id: int
     ) -> Shipment:
-        """
-        Create a new shipment in the database.
-        
-        Args:
-            request: The shipment request schema
-            response: The shipment response schema
-            courier: The courier object
-            shipment_type_id: The shipment type ID
-            
-        Returns:
-            Created Shipment object
-            
-        Raises:
-            IntegrityError: If reference number already exists
-        """
         try:
             with transaction.atomic():
                 logger.info(f"ShipmentCreationService: Creating new shipment for reference {request.reference_number}")

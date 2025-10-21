@@ -16,10 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class DHLCourier(BaseCourier, CancellableCourierInterface):
-    """DHL courier implementation following SOLID principles."""
-    
     def _create_http_client(self):
-        """Create DHL HTTP client with OAuth credentials."""
         return DHLHttpClient(
             base_url=self.config.get('base_url', ''),
             api_key=self.config.get('api_key'),
@@ -30,26 +27,15 @@ class DHLCourier(BaseCourier, CancellableCourierInterface):
         )
     
     def _prepare_payload(self, request: ShipmentRequest) -> Dict[str, Any]:
-        """Prepare DHL-specific payload from standardized request."""
         return DHLPayloadBuilder.build_dhl_payload(request)
     
     def _map_response(self, response_data: Dict[str, Any]) -> ShipmentResponse:
-        """Map DHL response to standardized ShipmentResponse."""
         return DHLResponseMapper.map_dhl_response_to_shipment_response(
             response_data.get('data', {}),
             response_data.get('success', False)
         )
     
     def fetch_label(self, courier_external_id: str) -> Dict[str, Any]:
-        """
-        Fetch label from DHL API.
-        
-        Args:
-            courier_external_id: The courier external ID
-            
-        Returns:
-            Dict containing label data or error
-        """
         try:
             logger.info(f"DHL: Fetching label for shipment {courier_external_id}")
             
@@ -84,15 +70,6 @@ class DHLCourier(BaseCourier, CancellableCourierInterface):
             }
     
     def track_shipment(self, courier_external_id: str) -> TrackingResponse:
-        """
-        Track shipment with DHL API.
-        
-        Args:
-            courier_external_id: The courier external ID
-            
-        Returns:
-            TrackingResponse containing tracking data or error
-        """
         try:
             logger.info(f"DHL: Tracking shipment {courier_external_id}")
             
@@ -136,19 +113,9 @@ class DHLCourier(BaseCourier, CancellableCourierInterface):
             )
     
     def cancel_shipment(self, courier_external_id: str) -> Dict[str, Any]:
-        """
-        Cancel shipment with DHL API.
-        
-        Args:
-            courier_external_id: The DHL shipment ID
-            
-        Returns:
-            Dict containing cancellation result
-        """
         try:
             logger.info(f"DHL: Cancelling shipment {courier_external_id}")
             
-            # Cancel shipment with DHL (token handled automatically)
             cancel_response = self.http_client.cancel_shipment(courier_external_id)
             
             if cancel_response.get('success'):

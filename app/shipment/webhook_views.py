@@ -1,5 +1,3 @@
-"""Webhook views for courier integrations."""
-
 import json
 import logging
 from django.http import JsonResponse
@@ -23,19 +21,9 @@ logger = logging.getLogger(__name__)
 @api_view(['POST'])
 @csrf_exempt
 def dhl_webhook(request):
-    """
-    DHL webhook endpoint for receiving shipment status updates.
-    
-    This endpoint follows the Single Responsibility Principle by delegating
-    specific tasks to specialized classes:
-    - DHLWebhookValidator: Validates the request
-    - DHLWebhookParser: Parses the payload
-    - DHLWebhookProcessor: Processes the data and updates database
-    """
     try:
         logger.info("DHL Webhook: Received webhook request")
         
-        # Step 1: Validate the request
         if not DHLWebhookValidator.validate_request(request):
             logger.warning("DHL Webhook: Request validation failed")
             return Response(
@@ -47,7 +35,6 @@ def dhl_webhook(request):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        # Step 2: Parse the payload
         try:
             payload = json.loads(request.body)
         except json.JSONDecodeError as e:

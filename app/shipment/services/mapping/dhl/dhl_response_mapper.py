@@ -1,5 +1,3 @@
-"""DHL-specific response mapping service."""
-
 import logging
 from typing import Dict, Any
 from ....schemas.shipment_response import ShipmentResponse
@@ -8,15 +6,12 @@ logger = logging.getLogger(__name__)
 
 
 class DHLResponseMapper:
-    """Maps DHL-specific responses to standardized ShipmentResponse format."""
-    
     @classmethod
     def map_dhl_response_to_shipment_response(
         cls, 
         dhl_response: Dict[str, Any], 
         success: bool = True
     ) -> ShipmentResponse:
-        """Map DHL API response to standardized ShipmentResponse."""
         try:
             if not success:
                 if isinstance(dhl_response, str):

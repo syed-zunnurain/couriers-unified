@@ -2,8 +2,6 @@ from django.db import models
 
 
 class Shipment(models.Model):
-    """Model representing a shipment with courier and tracking information."""
-    
     courier = models.ForeignKey(
         'core.Courier',
         on_delete=models.CASCADE,
@@ -75,8 +73,6 @@ class Shipment(models.Model):
 
 
 class Shipper(models.Model):
-    """Model representing a shipper (sender) of shipments."""
-    
     name = models.CharField(max_length=255, help_text="Name of the shipper")
     address = models.TextField(help_text="Address of the shipper")
     postal_code = models.CharField(max_length=25, help_text="Postal code of the shipper")
@@ -98,8 +94,6 @@ class Shipper(models.Model):
 
 
 class Consignee(models.Model):
-    """Model representing a consignee (receiver) of shipments."""
-    
     name = models.CharField(max_length=255, help_text="Name of the consignee")
     address = models.TextField(help_text="Address of the consignee")
     city = models.CharField(max_length=100, help_text="City of the consignee")
@@ -121,8 +115,6 @@ class Consignee(models.Model):
 
 
 class ShipmentRequest(models.Model):
-    """Model representing shipment requests with retry logic."""
-    
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('processing', 'Processing'),
@@ -163,8 +155,6 @@ class ShipmentRequest(models.Model):
 
 
 class ShipmentLabel(models.Model):
-    """Model representing shipment labels with URL and format information."""
-    
     shipment = models.ForeignKey(
         'Shipment',
         on_delete=models.CASCADE,
@@ -205,8 +195,6 @@ class ShipmentLabel(models.Model):
 
 
 class ShipmentStatus(models.Model):
-    """Model representing shipment status updates with location information."""
-    
     shipment = models.ForeignKey(
         'Shipment',
         on_delete=models.CASCADE,

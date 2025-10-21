@@ -1,5 +1,3 @@
-"""DHL tracking response parser for handling tracking-specific responses."""
-
 import logging
 from typing import Dict, Any, List, Optional
 from datetime import datetime
@@ -8,19 +6,8 @@ logger = logging.getLogger(__name__)
 
 
 class DHLTrackingResponseParser:
-    """Parser for DHL tracking API responses."""
-    
     @staticmethod
     def parse_tracking_response(response_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """
-        Parse successful DHL tracking response.
-        
-        Args:
-            response_data: The response data from DHL API
-            
-        Returns:
-            Dict containing tracking data or None if parsing fails
-        """
         try:
             if 'shipments' in response_data and response_data['shipments']:
                 shipment = response_data['shipments'][0]
@@ -45,8 +32,6 @@ class DHLTrackingResponseParser:
     
     @staticmethod
     def _parse_events(events: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """
-        Parse tracking events from DHL response.
         
         Args:
             events: List of events from DHL API

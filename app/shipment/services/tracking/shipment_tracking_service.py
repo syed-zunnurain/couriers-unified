@@ -1,5 +1,3 @@
-"""Service for orchestrating shipment tracking operations."""
-
 import logging
 from typing import Dict, Any, List
 from datetime import datetime
@@ -12,8 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 class ShipmentTrackingService:
-    """Service for orchestrating shipment tracking operations."""
-    
     def __init__(self, 
                  courier_factory_instance=None,
                  lookup_service: ShipmentLookupService = None):
@@ -21,15 +17,6 @@ class ShipmentTrackingService:
         self._lookup_service = lookup_service or ShipmentLookupService()
     
     def track_shipment_by_reference(self, reference_number: str) -> TrackingResponse:
-        """
-        Track shipment by reference number using shipment status table.
-        
-        Args:
-            reference_number: The shipment reference number
-            
-        Returns:
-            TrackingResponse containing tracking information or error
-        """
         try:
             logger.info(f"ShipmentTrackingService: Tracking shipment for reference {reference_number}")
             
@@ -40,7 +27,6 @@ class ShipmentTrackingService:
                     'SHIPMENT_NOT_FOUND'
                 )
             
-            # Get status information from shipment status table
             status_summary = ShipmentStatusService.get_status_summary(shipment)
             latest_status = ShipmentStatusService.get_latest_status(shipment)
             

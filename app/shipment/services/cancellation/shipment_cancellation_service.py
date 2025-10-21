@@ -10,8 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 class ShipmentCancellationService:
-    """Service for handling shipment cancellations."""
-    
     def __init__(self, 
                  lookup_service: ShipmentLookupService = None,
                  courier_cancellation_service: CourierCancellationService = None):
@@ -19,19 +17,9 @@ class ShipmentCancellationService:
         self._courier_cancellation_service = courier_cancellation_service or CourierCancellationService()
     
     def cancel_shipment_by_reference(self, reference_number: str) -> CancellationResponse:
-        """
-        Cancel shipment by reference number.
-        
-        Args:
-            reference_number: The shipment reference number
-            
-        Returns:
-            Dict containing cancellation result
-        """
         try:
             logger.info(f"ShipmentCancellationService: Cancelling shipment for reference {reference_number}")
             
-            # Find shipment
             shipment = self._lookup_service.get_shipment_by_reference(reference_number)
             if not shipment:
                 return CancellationResponse.create_error_response(
@@ -39,14 +27,12 @@ class ShipmentCancellationService:
                     'SHIPMENT_NOT_FOUND'
                 )
             
-            # Check if courier supports cancellation
             if not self._courier_supports_cancellation(shipment):
                 return CancellationResponse.create_error_response(
                     f'Courier {shipment.courier.name} does not support cancellation',
                     'CANCELLATION_NOT_SUPPORTED'
                 )
             
-            # Check shipment status
             status_check = self._check_shipment_cancellable(shipment)
             if not status_check.success:
                 return status_check

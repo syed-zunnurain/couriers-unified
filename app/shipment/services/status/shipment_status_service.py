@@ -7,8 +7,6 @@ from ..mapping.status_mapping_service import StatusMappingService
 logger = logging.getLogger(__name__)
 
 class ShipmentStatusService:
-    """Service for managing shipment status updates."""
-    
     @classmethod
     def create_status(cls, 
                      shipment: Shipment, 
@@ -16,9 +14,6 @@ class ShipmentStatusService:
                      address: Optional[str] = None,
                      postal_code: Optional[str] = None,
                      country: Optional[str] = None) -> ShipmentStatus:
-        """Create a new status entry for a shipment."""
-        
-        # Validate status
         if not StatusMappingService.is_valid_status(status):
             logger.warning(f"ShipmentStatusService: Invalid status '{status}' for shipment {shipment.reference_number}")
             status = 'unknown'
@@ -37,12 +32,10 @@ class ShipmentStatusService:
     
     @classmethod
     def get_latest_status(cls, shipment: Shipment) -> Optional[ShipmentStatus]:
-        """Get the latest status for a shipment."""
         return ShipmentStatus.objects.filter(shipment=shipment).order_by('-created_at').first()
     
     @classmethod
     def get_status_history(cls, shipment: Shipment) -> List[ShipmentStatus]:
-        """Get complete status history for a shipment."""
         return list(ShipmentStatus.objects.filter(shipment=shipment).order_by('created_at'))
     
     @classmethod

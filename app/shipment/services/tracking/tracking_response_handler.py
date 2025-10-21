@@ -1,5 +1,3 @@
-"""Handles API responses for shipment tracking operations."""
-
 import logging
 from rest_framework.response import Response
 from rest_framework import status
@@ -10,13 +8,8 @@ logger = logging.getLogger(__name__)
 
 
 class TrackingResponseHandler:
-    """Handles API responses for shipment tracking operations, mapping internal errors to HTTP status codes."""
-
     @staticmethod
     def handle_result(result: TrackingResponse) -> Response:
-        """
-        Handles the result from the ShipmentTrackingService and returns an appropriate DRF Response.
-        """
         if result.success:
             data = result.to_dict()
             data.pop('success', None)
@@ -44,9 +37,6 @@ class TrackingResponseHandler:
 
     @staticmethod
     def _map_error_code_to_http_status(error_code: str) -> int:
-        """
-        Maps internal error codes to appropriate HTTP status codes.
-        """
         if error_code in ['SHIPMENT_NOT_FOUND', 'SHIPMENT_NOT_FOUND_IN_COURIER', 'COURIER_NOT_FOUND']:
             return status.HTTP_404_NOT_FOUND
         elif error_code in ['UNSUPPORTED_COURIER', 'COURIER_BAD_REQUEST']:

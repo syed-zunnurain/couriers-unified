@@ -7,11 +7,8 @@ logger = logging.getLogger(__name__)
 
 
 class ShipmentRequestService:
-    """Service class for handling shipment request business logic."""
-    
     @staticmethod
     def get_or_create_shipper(shipper_id=None, shipper_data=None):
-        """Get existing shipper or create new one."""
         if shipper_id:
             return repositories.shipper.get_by_id(shipper_id)
         else:
@@ -22,7 +19,6 @@ class ShipmentRequestService:
     
     @staticmethod
     def get_or_create_consignee(consignee_id=None, consignee_data=None):
-        """Get existing consignee or create new one."""
         if consignee_id:
             return repositories.consignee.get_by_id(consignee_id)
         else:
@@ -33,7 +29,6 @@ class ShipmentRequestService:
     
     @staticmethod
     def prepare_request_body(validated_data, shipper, consignee):
-        """Prepare the JSON request body for storage."""
         pickup_date = validated_data.get('pickup_date')
         if pickup_date:
             pickup_date_str = pickup_date.isoformat() if hasattr(pickup_date, 'isoformat') else str(pickup_date)
@@ -56,7 +51,6 @@ class ShipmentRequestService:
     
     @classmethod
     def check_existing_request(cls, reference_number):
-        """Check if a shipment request with the same reference number already exists."""
         existing_request = repositories.shipment_request.get_latest_by_reference_number(reference_number)
         
         if existing_request:
@@ -69,7 +63,6 @@ class ShipmentRequestService:
     
     @classmethod
     def create_shipment_request(cls, validated_data):
-        """Create a new shipment request with all related data."""
         reference_number = validated_data['reference_number']
         
         if validated_data.get('action') == 'existing_shipment_found':

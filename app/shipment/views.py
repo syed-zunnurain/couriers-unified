@@ -44,15 +44,6 @@ def create_shipment_request(request):
 
 @api_view(['GET'])
 def get_shipment_label(request, reference_number: str):
-    """
-    Get shipment label by reference number.
-    
-    Args:
-        reference_number: The shipment reference number (path parameter)
-        
-    Returns:
-        JSON response with label information or error
-    """
     try:
         from .services.labels.label_response_handler import LabelResponseHandler
         
@@ -74,15 +65,6 @@ def get_shipment_label(request, reference_number: str):
 
 @api_view(['GET'])
 def track_shipment(request, reference_number: str):
-    """
-    Track shipment by reference number.
-    
-    Args:
-        reference_number: The shipment reference number (path parameter)
-        
-    Returns:
-        JSON response with tracking information or error
-    """
     try:
         from .services.tracking.tracking_response_handler import TrackingResponseHandler
         
@@ -104,15 +86,6 @@ def track_shipment(request, reference_number: str):
 
 @api_view(['POST'])
 def cancel_shipment(request, reference_number: str):
-    """
-    Cancel shipment by reference number.
-    
-    Args:
-        reference_number: The shipment reference number (path parameter)
-        
-    Returns:
-        JSON response with cancellation result or error
-    """
     try:
         cancellation_service = ShipmentCancellationService()
         result = cancellation_service.cancel_shipment_by_reference(reference_number)

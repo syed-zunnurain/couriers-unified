@@ -5,12 +5,10 @@ from dataclasses import dataclass
 
 @dataclass
 class Weight:
-    """Represents weight with value and unit."""
     value: float
     unit: str
     
     def to_kg(self) -> float:
-        """Convert weight to kilograms."""
         if self.unit.lower() in ['kg', 'kilogram', 'kilograms']:
             return self.value
         else:
@@ -19,14 +17,12 @@ class Weight:
 
 @dataclass
 class Dimensions:
-    """Represents dimensions with height, width, length and unit."""
     height: float
     width: float
     length: float
     unit: str
     
     def to_cm(self) -> 'Dimensions':
-        """Convert dimensions to centimeters."""
         if self.unit.lower() in ['mm', 'millimeter', 'millimeters']:
             return self
         else:
@@ -35,7 +31,6 @@ class Dimensions:
 
 @dataclass
 class CourierRequest:
-    """Standardized request format for all couriers."""
     shipment_type: str
     reference_number: str
     shipper: 'Shipper'
@@ -48,7 +43,6 @@ class CourierRequest:
 
 @dataclass
 class CourierResponse:
-    """Standardized response format for all couriers."""
     success: bool
     tracking_number: Optional[str] = None
     courier_reference: Optional[str] = None
@@ -59,23 +53,12 @@ class CourierResponse:
 
 
 class CourierInterface(ABC):
-    """Abstract base class that all courier implementations must follow."""
-    
     def __init__(self, courier_name: str, config: Dict[str, Any]):
         self.courier_name = courier_name
         self.config = config
     
     @abstractmethod
     def create_shipment(self, request: CourierRequest) -> CourierResponse:
-        """
-        Create a shipment with the courier.
-        
-        Args:
-            request: Standardized courier request
-            
-        Returns:
-            Standardized courier response
-        """
         pass
     
     def __str__(self):

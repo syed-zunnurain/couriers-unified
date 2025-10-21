@@ -1,5 +1,3 @@
-"""DHL webhook validator following Single Responsibility Principle."""
-
 import logging
 from typing import Dict, Any, Optional
 from django.http import HttpRequest
@@ -8,38 +6,19 @@ logger = logging.getLogger(__name__)
 
 
 class DHLWebhookValidator:
-    """
-    Single Responsibility: Validate DHL webhook requests and payloads.
-    
-    This class only handles validation of webhook requests.
-    It doesn't parse, process, or store data - just validates.
-    """
-    
     @classmethod
     def validate_request(cls, request: HttpRequest) -> bool:
-        """
-        Validate the incoming webhook request.
-        
-        Args:
-            request: Django HTTP request object
-            
-        Returns:
-            True if request is valid, False otherwise
-        """
         try:
             logger.info("DHLWebhookValidator: Starting request validation")
             
-            # Check HTTP method
             if not cls._validate_http_method(request):
                 logger.warning("DHLWebhookValidator: Invalid HTTP method")
                 return False
             
-            # Check content type
             if not cls._validate_content_type(request):
                 logger.warning("DHLWebhookValidator: Invalid content type")
                 return False
             
-            # Check headers
             if not cls._validate_headers(request):
                 logger.warning("DHLWebhookValidator: Invalid headers")
                 return False
