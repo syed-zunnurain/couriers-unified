@@ -22,7 +22,14 @@ A unified shipping API that integrates with multiple courier services (currently
    docker-compose up --build
    ```
 
-3. **Access the application**
+   
+3. **Start the Background Worker
+The system includes a background worker for processing shipment requests:
+```bash
+./run_worker.sh
+```
+
+4. **Access the application**
    - API Base URL: `http://localhost:8000`
    - Database: PostgreSQL on port `5433`
 
@@ -725,12 +732,6 @@ docker-compose exec app python manage.py migrate
 ### Seeding Data
 ```bash
 docker-compose exec app python manage.py seed_all
-```
-
-### Background Worker
-The system includes a background worker for processing shipment requests:
-```bash
-./run_worker.sh
 ```
 
 ## 📝 Environment Variables
