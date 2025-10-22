@@ -1,6 +1,6 @@
 import logging
 from typing import Dict, Any
-from ..couriers.courier_interface import CourierRequest, Weight, Dimensions
+from ..couriers.courier_dtos import CourierRequest, Weight, Dimensions
 from ...repositories.repository_factory import repositories
 
 logger = logging.getLogger(__name__)

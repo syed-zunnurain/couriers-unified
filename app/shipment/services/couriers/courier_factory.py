@@ -1,6 +1,6 @@
 import logging
 from typing import Dict, Any, Optional
-from .courier_interface import CourierInterface, CourierRequest, CourierResponse
+from .courier_dtos import CourierRequest, CourierResponse
 from .dhl_courier import DHLCourier
 from .base_courier import BaseCourier
 from ...repositories.repository_factory import repositories
@@ -16,9 +16,9 @@ class CourierFactory:
     }
     
     def __init__(self):
-        self._couriers: Dict[str, CourierInterface] = {}
+        self._couriers: Dict[str, BaseCourier] = {}
     
-    def get_courier_instance(self, courier_name: str, courier_obj=None) -> Optional[CourierInterface]:
+    def get_courier_instance(self, courier_name: str, courier_obj=None) -> Optional[BaseCourier]:
         courier_name = courier_name.lower()
         logger.info(f"CourierFactory: Getting courier instance for '{courier_name}'")
         

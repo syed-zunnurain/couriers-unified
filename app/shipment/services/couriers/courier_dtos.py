@@ -1,6 +1,5 @@
-from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional
 from dataclasses import dataclass
+from typing import Dict, Any, Optional
 
 
 @dataclass
@@ -41,6 +40,7 @@ class CourierRequest:
     pickup_date: Optional[str] = None
     special_instructions: Optional[str] = None
 
+
 @dataclass
 class CourierResponse:
     success: bool
@@ -50,16 +50,3 @@ class CourierResponse:
     cost: Optional[float] = None
     error_message: Optional[str] = None
     raw_response: Optional[Dict[str, Any]] = None
-
-
-class CourierInterface(ABC):
-    def __init__(self, courier_name: str, config: Dict[str, Any]):
-        self.courier_name = courier_name
-        self.config = config
-    
-    @abstractmethod
-    def create_shipment(self, request: CourierRequest) -> CourierResponse:
-        pass
-    
-    def __str__(self):
-        return f"{self.courier_name} Courier"
