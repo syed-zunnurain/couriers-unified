@@ -39,19 +39,19 @@ class CourierProcessor:
                 request_data, reference_number, shipper, consignee
             )
 
-            logger.info(f"CourierProcessor: Calling courier_factory.create_shipment for '{courier.name.lower()}'")
+            logger.info(f"CourierProcessor: Calling ShipmentCreationService for '{courier.name}'")
             logger.info(f"CourierProcessor: Request body details - Reference: {reference_number}, Weight: {courier_request.weight.value} {courier_request.weight.unit}, Dimensions: {courier_request.dimensions.height}x{courier_request.dimensions.width}x{courier_request.dimensions.length} {courier_request.dimensions.unit}, Shipper: {shipper.city}, Consignee: {consignee.city}")
             
-            from .courier_factory import courier_factory
+            # Use ShipmentCreationService which handles both API call and persistence
+            from ..shipments.shipment_creation_service import ShipmentCreationService
+            creation_service = ShipmentCreationService()
             
-            courier_response = courier_factory.create_shipment(
-                courier.name.lower(), 
+            courier_response = creation_service.create_shipment(
                 courier_request, 
-                courier, 
                 request_data.get('shipment_type_id')
             )
             
-            logger.info(f"CourierProcessor: Received response from courier_factory: success={courier_response.success}")
+            logger.info(f"CourierProcessor: Received response from ShipmentCreationService: success={courier_response.success}")
             
             if courier_response.success:
                 logger.info(f"CourierProcessor: Courier '{courier.name}' processing successful, tracking_number={courier_response.tracking_number}")

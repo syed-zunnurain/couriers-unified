@@ -38,17 +38,17 @@ class ShipmentLabelService:
             
             courier_name = shipment.courier.name.lower()
             label_data = self._courier_factory.fetch_label(courier_name, shipment.courier_external_id)
-            if not label_data['success']:
+            if not label_data.success:
                 return LabelResponse.create_error_response(
-                    label_data['error'],
-                    label_data['error_code']
+                    label_data.error,
+                    label_data.error_code
                 )
             
             saved_label = self._cache_service.save_label(
                 shipment_id=shipment.id,
                 reference_number=reference_number,
-                url=label_data['url'],
-                format=label_data['format']
+                url=label_data.url,
+                format=label_data.format
             )
             
             if not saved_label:

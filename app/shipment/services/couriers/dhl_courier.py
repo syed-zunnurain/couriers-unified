@@ -4,6 +4,7 @@ from .base_courier import BaseCourier
 from .cancellable_courier_interface import CancellableCourierInterface
 from ...schemas.shipment_request import ShipmentRequest
 from ...schemas.shipment_response import ShipmentResponse
+from ...schemas.label_response import LabelResponse
 from ..http_clients.dhl_client import DHLHttpClient
 from ..mapping.dhl.dhl_payload_builder import DHLPayloadBuilder
 from ..mapping.dhl.dhl_response_mapper import DHLResponseMapper
@@ -35,7 +36,7 @@ class DHLCourier(BaseCourier, CancellableCourierInterface):
             response_data.get('success', False)
         )
     
-    def fetch_label(self, courier_external_id: str) -> Dict[str, Any]:
+    def fetch_label(self, courier_external_id: str) -> LabelResponse:
         try:
             logger.info(f"DHL: Fetching label for shipment {courier_external_id}")
             
@@ -44,30 +45,50 @@ class DHLCourier(BaseCourier, CancellableCourierInterface):
             if response.get('success') and response.get('data'):
                 label_data = DHLLabelResponseParser.parse_success_response(response['data'])
                 if label_data:
-                    return label_data
+                    return LabelResponse.from_dict(label_data)
                 else:
-                    return {
-                        'success': False,
-                        'error': 'Label URL not found in DHL response',
-                        'error_code': 'LABEL_URL_NOT_FOUND'
-                    }
+                    return LabelResponse.create_error_response(
+                        'Label URL not found in DHL response',
+                        'LABEL_URL_NOT_FOUND'
+                    )
             else:
                 error_info = DHLLabelResponseParser.parse_error_response(
                     response.get('error', 'Failed to fetch label from DHL')
                 )
-                return {
-                    'success': False,
-                    'error': error_info['error_message'],
-                    'error_code': error_info['error_code']
-                }
+                return LabelResponse.create_error_response(
+                    error_info['error_message'],
+                    error_info['error_code']
+                )
                 
         except Exception as e:
             logger.error(f"DHL: Error fetching label: {str(e)}")
-            return {
-                'success': False,
-                'error': f'DHL API error: {str(e)}',
-                'error_code': 'COURIER_API_ERROR'
-            }
+            return LabelResponse.create_error_response(
+                f'DHL API error: {str(e)}',
+                'COURIER_API_ERROR'
+            )
+    
+    def create_shipment(self, request: ShipmentRequest, shipment_type_id: int = None) -> ShipmentResponse:
+        try:
+            logger.info(f"DHL: Starting shipment creation")
+            logger.info(f"DHL: Request details - Reference: {request.reference_number}, Weight: {request.weight.value} {request.weight.unit}, Dimensions: {request.dimensions.height}x{request.dimensions.width}x{request.dimensions.length} {request.dimensions.unit}, Shipper: {request.shipper.city}, Consignee: {request.consignee.city}")
+            
+            payload = self._prepare_payload(request)
+            logger.info(f"DHL: Prepared payload")
+            logger.debug(f"DHL: Full payload: {payload}")
+            
+            response_data = self.http_client.create_shipment(payload)
+            
+            shipment_response = self._map_response(response_data)
+            
+            logger.info(f"DHL: Shipment creation completed - Success: {shipment_response.success}")
+            return shipment_response
+            
+        except Exception as e:
+            logger.error(f"DHL: Error creating shipment: {str(e)}")
+            return ShipmentResponse(
+                success=False,
+                error_message=f"DHL error: {str(e)}"
+            )
     
     def track_shipment(self, courier_external_id: str) -> TrackingResponse:
         try:

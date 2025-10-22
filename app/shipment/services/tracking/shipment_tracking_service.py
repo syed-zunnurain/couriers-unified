@@ -36,7 +36,6 @@ class ShipmentTrackingService:
                     'NO_STATUS_FOUND'
                 )
             
-            # Build tracking response from status data
             tracking_response = self._build_tracking_response_from_status(shipment, status_summary)
             
             logger.info(f"ShipmentTrackingService: Successfully tracked shipment for reference {reference_number}")
@@ -50,19 +49,15 @@ class ShipmentTrackingService:
             )
     
     def _build_tracking_response_from_status(self, shipment, status_summary: dict) -> TrackingResponse:
-        """Build TrackingResponse from shipment status data."""
         
-        # Get latest status
         latest_status = ShipmentStatusService.get_latest_status(shipment)
         
-        # Build current location from latest status
         current_location = TrackingLocation(
             address=latest_status.address or '',
             country=latest_status.country or '',
             postal_code=latest_status.postal_code or ''
         )
         
-        # Build events from status history
         events = []
         for status_entry in status_summary['status_history']:
             location = TrackingLocation(
@@ -79,7 +74,6 @@ class ShipmentTrackingService:
             )
             events.append(event)
         
-        # Build origin and destination from shipment data
         origin = TrackingLocation(
             address=shipment.shipper.address if shipment.shipper else '',
             country=shipment.shipper.country if shipment.shipper else '',
@@ -96,7 +90,7 @@ class ShipmentTrackingService:
         
         return TrackingResponse(
             success=True,
-            tracking_number='',  # Remove tracking number from response
+            tracking_number='',
             service=shipment.courier.name if shipment.courier else '',
             current_status=latest_status.status,
             status_description=StatusMappingService.get_status_display_name(latest_status.status),
@@ -104,7 +98,7 @@ class ShipmentTrackingService:
             events=events,
             origin=origin,
             destination=destination,
-            details=TrackingDetails('', {}, []),  # Empty details object
+            details=TrackingDetails('', {}, []),
             reference_number=shipment.reference_number,
             shipment_id=shipment.id
         )

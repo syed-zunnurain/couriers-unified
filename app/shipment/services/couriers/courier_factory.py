@@ -5,6 +5,7 @@ from .dhl_courier import DHLCourier
 from .base_courier import BaseCourier
 from ...repositories.repository_factory import repositories
 from ...schemas.tracking_response import TrackingResponse
+from ...schemas.label_response import LabelResponse
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ class CourierFactory:
         if courier_name not in self.COURIER_CLASSES:
             logger.warning(f"CourierFactory: Courier '{courier_name}' not found in COURIER_CLASSES")
             return None
-        
+
         try:
             logger.info(f"CourierFactory: Looking up courier configuration for '{courier_name}' in database")
             courier_config = repositories.courier_config.get_by_courier_name(courier_name)
@@ -76,29 +77,27 @@ class CourierFactory:
                 error_message=f"Failed to create shipment with {courier_name}: {str(e)}"
             )
     
-    def fetch_label(self, courier_name: str, courier_external_id: str) -> Dict[str, Any]:
+    def fetch_label(self, courier_name: str, courier_external_id: str) -> LabelResponse:
         logger.info(f"CourierFactory: Fetching label with courier '{courier_name}'")
         try:
             logger.info(f"CourierFactory: Getting courier instance for '{courier_name}'")
             courier = self.get_courier_instance(courier_name)
             if not courier:
                 logger.error(f"CourierFactory: Courier '{courier_name}' not found or not configured")
-                return {
-                    'success': False,
-                    'error': f"Courier '{courier_name}' not found or not configured",
-                    'error_code': 'COURIER_NOT_FOUND'
-                }
+                return LabelResponse.create_error_response(
+                    f"Courier '{courier_name}' not found or not configured",
+                    'COURIER_NOT_FOUND'
+                )
             
             logger.info(f"CourierFactory: Found courier instance '{courier.courier_name}', calling fetch_label")
             response = courier.fetch_label(courier_external_id)
-            logger.info(f"CourierFactory: Received response from courier: success={response.get('success', False)}")
+            logger.info(f"CourierFactory: Received response from courier: success={response.success}")
             return response
         except Exception as e:
-            return {
-                'success': False,
-                'error': f"Failed to fetch label with {courier_name}: {str(e)}",
-                'error_code': 'COURIER_API_ERROR'
-            }
+            return LabelResponse.create_error_response(
+                f"Failed to fetch label with {courier_name}: {str(e)}",
+                'COURIER_API_ERROR'
+            )
     
     def track_shipment(self, courier_name: str, courier_external_id: str) -> TrackingResponse:
         logger.info(f"CourierFactory: Tracking shipment with courier '{courier_name}'")

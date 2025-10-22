@@ -35,11 +35,9 @@ class CourierCancellationService:
                     'CANCELLATION_NOT_SUPPORTED'
                 )
             
-            # Call courier's cancel method
             logger.info(f"CourierCancellationService: Calling {shipment.courier.name} API to cancel shipment {shipment.courier_external_id}")
             courier_result = courier_instance.cancel_shipment(shipment.courier_external_id)
             
-            # Convert courier result to response object
             if courier_result.get('success'):
                 logger.info(f"CourierCancellationService: Successfully cancelled with {shipment.courier.name}")
                 return CancellationResponse.create_success_response(

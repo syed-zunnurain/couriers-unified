@@ -27,8 +27,8 @@ class FindAvailableCourier:
                         available_couriers.append(courier)
                 
                 if available_couriers:
-                    selected_courier = self._round_robin_selection(available_couriers, shipment_type_id, shipper_city, consignee_city)
-                    logger.info(f'Selected courier: {selected_courier.name} using round-robin')
+                    selected_courier = self._least_used_courier_selection(available_couriers, shipment_type_id, shipper_city, consignee_city)
+                    logger.info(f'Selected courier: {selected_courier.name} using least-used selection')
                     return selected_courier
                 else:
                     logger.warning('No active couriers found')
@@ -41,7 +41,7 @@ class FindAvailableCourier:
             logger.error(f'Error finding available courier: {str(e)}')
             return None
     
-    def _round_robin_selection(self, available_couriers, shipment_type_id, shipper_city, consignee_city):
+    def _least_used_courier_selection(self, available_couriers, shipment_type_id, shipper_city, consignee_city):
         try:
             if len(available_couriers) == 1:
                 logger.info(f'Only one courier available: {available_couriers[0].name}')
@@ -68,6 +68,6 @@ class FindAvailableCourier:
             return sorted_couriers[0] if sorted_couriers else None
             
         except Exception as e:
-            logger.error(f'Error in round-robin selection: {str(e)}')
+            logger.error(f'Error in least-used courier selection: {str(e)}')
             return available_couriers[0] if available_couriers else None
 
