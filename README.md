@@ -23,7 +23,7 @@ A unified shipping API that integrates with multiple courier services (currently
    ```
 
    
-3. **Start the Background Worker
+3. **Start the Background Worker**
 The system includes a background worker for processing shipment requests:
 ```bash
 ./run_worker.sh
