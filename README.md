@@ -651,6 +651,11 @@ Content-Type: application/json
 }
 ```
 
+**Important Notes:**
+- The `tracking_number` in the webhook payload is the **courier's tracking number** (e.g., DHL's tracking number)
+- The system maps this to our internal shipment by searching the `shipments` table using the `courier_external_id` field
+- This allows us to track status updates from couriers using their native tracking identifiers
+
 **Success Response (200):**
 ```json
 {
@@ -705,6 +710,11 @@ The system is designed to easily integrate new courier services. Here's a simple
 ```bash
 docker-compose exec app python manage.py test
 ```
+
+### Running Background Worker
+```bash
+# Start the background worker using the shell script
+sh worker.sh
 
 ### Database Migrations
 ```bash
