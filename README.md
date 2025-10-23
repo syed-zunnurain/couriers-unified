@@ -420,6 +420,41 @@ sequenceDiagram
     API-->>Client: Return cancellation response
 ```
 
+## 📦 Shipment Types
+
+Shipment types define the delivery speed and service level for your packages. Each courier supports different shipment types, and the system automatically maps these to the appropriate courier-specific product codes.
+
+### Available Shipment Types
+
+| ID | Name | Description | DHL Product Code | Supported by DHL |
+|----|------|-------------|------------------|------------------|
+| 1 | `NORMAL` | Standard delivery (1-3 business days) | `V01PAK` | ✅ |
+| 2 | `URGENT` | Express delivery (1-2 business days) | `V53WPAK` | ✅ |
+| 3 | `SAME_DAY_DELIVERY` | Same-day delivery | `V54EPAK` | ❌ |
+
+### How Shipment Types Work
+
+1. **Courier Compatibility**: Not all couriers support all shipment types. The system maintains a mapping table (`courier_shipment_types`) that defines which shipment types each courier can handle.
+
+2. **Automatic Mapping**: When you create a shipment request, the system:
+   - Validates that the requested courier supports the specified shipment type
+   - Maps the internal shipment type to the courier's specific product code
+   - Uses the appropriate courier API parameters
+
+3. **Route Dependencies**: Shipment types are also validated against available routes. A courier must support both the shipment type and the specific origin-destination route.
+
+### Using Shipment Types in API Requests
+
+When creating a shipment request, specify the `shipment_type_id` in your request:
+
+```json
+{
+  "shipment_type_id": 1,  // Use ID 1 for NORMAL delivery
+  "reference_number": "REF123456",
+  // ... other fields
+}
+```
+
 ## 📚 API Documentation
 
 ### 1. Create Shipment Request
