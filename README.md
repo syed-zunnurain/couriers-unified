@@ -441,8 +441,6 @@ Shipment types define the delivery speed and service level for your packages. Ea
    - Maps the internal shipment type to the courier's specific product code
    - Uses the appropriate courier API parameters
 
-3. **Route Dependencies**: Shipment types are also validated against available routes. A courier must support both the shipment type and the specific origin-destination route.
-
 ### Using Shipment Types in API Requests
 
 When creating a shipment request, specify the `shipment_type_id` in your request:
